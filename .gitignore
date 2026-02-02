@@ -8,3 +8,6 @@ storage/framework/*
 bootstrap/cache/*
 .idea
 .vscode
+/public/build
+/public/storage
+/Trash bin
