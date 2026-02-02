@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\HomeSettings\Tables;
+namespace App\Filament\Resources\Settings\Tables;
 
-use App\Models\HomeSetting;
+use App\Models\Setting;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -14,7 +14,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
-class HomeSettingsTable
+class SettingsTable
 {
     public static function configure(Table $table): Table
     {
@@ -33,7 +33,7 @@ class HomeSettingsTable
             ])
             ->filters([
                 SelectFilter::make('group')
-                    ->options(collect(HomeSetting::getAllGroups())->mapWithKeys(fn($v, $k) => [$k => $v['title'] ?? $k])),
+                    ->options(collect(Setting::getAllGroups())->mapWithKeys(fn($v, $k) => [$k => $v['title'] ?? $k])),
             ])
             ->recordActions([
                 EditAction::make(),

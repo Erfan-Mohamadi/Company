@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\HomeSettings\Schemas;
+namespace App\Filament\Resources\Settings\Schemas;
 
-use App\Models\HomeSetting;
+use App\Models\Setting;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
@@ -10,56 +10,56 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 
-class HomeSettingForm
+class SettingForm
 {
     public static function configure(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Select::make('group')
-                    ->label('گروه')
-                    ->options(collect(HomeSetting::getAllGroups())->mapWithKeys(fn($v, $k) => [$k => $v['title'] ?? $k]))
+                    ->label(__('Group'))
+                    ->options(collect(Setting::getAllGroups())->mapWithKeys(fn($v, $k) => [$k => $v['title'] ?? $k]))
                     ->required(),
 
                 TextInput::make('name')
-                    ->label('نام کلید')
+                    ->label(__('Name'))
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->alphaDash(),
 
                 TextInput::make('label')
-                    ->label('نام نمایشی')
+                    ->label(__('Label'))
                     ->required(),
 
                 Select::make('type')
-                    ->label('نوع')
-                    ->options(HomeSetting::getAllTypes())
+                    ->label(__('Type'))
+                    ->options(Setting::getAllTypes())
                     ->required()
                     ->live(),
 
                 TextInput::make('value')
-                    ->label('مقدار')
+                    ->label(__('Value'))
                     ->visible(fn (Get $get) => in_array($get('type'), ['text','number']))
                     ->numeric(fn (Get $get) => $get('type') === 'number'),
 
                 Textarea::make('value')
-                    ->label('مقدار')
+                    ->label(__('Value'))
                     ->visible(fn (Get $get) => $get('type') === 'textarea')
                     ->rows(5),
 
                 SpatieMediaLibraryFileUpload::make('file')
-                    ->label('فایل (تصویر یا ویدئو)')
-                    ->collection('home_setting_files')
-                    ->image(fn (Get $get): bool => $get('type') === HomeSetting::TYPE_IMAGE)
+                    ->label(__('File (Image or Video)'))
+                    ->collection('setting_files')
+                    ->image(fn (Get $get): bool => $get('type') === Setting::TYPE_IMAGE)
                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/webm', 'video/ogg'])
-                    ->visible(fn (Get $get): bool => in_array($get('type'), [HomeSetting::TYPE_IMAGE, HomeSetting::TYPE_VIDEO]))
-                    ->required(fn (Get $get): bool => in_array($get('type'), [HomeSetting::TYPE_IMAGE, HomeSetting::TYPE_VIDEO]))
+                    ->visible(fn (Get $get): bool => in_array($get('type'), [Setting::TYPE_IMAGE, Setting::TYPE_VIDEO]))
+                    ->required(fn (Get $get): bool => in_array($get('type'), [Setting::TYPE_IMAGE, Setting::TYPE_VIDEO]))
                     ->disk('public')
-                    ->directory('home-settings')
+                    ->directory('settings')
                     ->imageEditor()
                     ->maxSize(20480)
                     ->preserveFilenames(),
-                ]);
+            ]);
 
     }
 }

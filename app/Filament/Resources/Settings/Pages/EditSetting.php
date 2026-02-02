@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Filament\Resources\HomeSettings\Pages;
+namespace App\Filament\Resources\Settings\Pages;
 
-use App\Filament\Resources\HomeSettings\HomeSettingResource;
+use App\Filament\Resources\Settings\SettingResource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Filament\Resources\Pages\EditRecord;
 
-class EditHomeSetting extends EditRecord
+class EditSetting extends EditRecord
 {
-    protected static string $resource = HomeSettingResource::class;
+    protected static string $resource = SettingResource::class;
 
     protected function getHeaderActions(): array
     {

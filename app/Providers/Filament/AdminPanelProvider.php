@@ -75,9 +75,7 @@ class AdminPanelProvider extends PanelProvider
                     ),
             ])
             ->navigationGroups([
-                NavigationGroup::make('Settings')
-                    ->label(__('Settings'))
-                    ->collapsed(),
+
             ])
             ->resourceCreatePageRedirect('index')
             ->resourceEditPageRedirect('index')

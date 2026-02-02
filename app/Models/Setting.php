@@ -7,7 +7,7 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class HomeSetting extends Model implements HasMedia
+class Setting extends Model implements HasMedia
 {
     use InteractsWithMedia;
 
@@ -22,14 +22,17 @@ class HomeSetting extends Model implements HasMedia
     public const TYPE_IMAGE    = 'image';
     public const TYPE_VIDEO    = 'video';
 
+    public const TYPE_CHECKBOX = 'checkbox';
+
     public static function getAllTypes(): array
     {
         return [
-            self::TYPE_TEXT     => 'متن کوتاه',
-            self::TYPE_TEXTAREA => 'متن بلند',
-            self::TYPE_NUMBER   => 'عددی',
-            self::TYPE_IMAGE    => 'تصویر',
-            self::TYPE_VIDEO    => 'ویدئو',
+            self::TYPE_TEXT     => __('Short Text'),
+            self::TYPE_TEXTAREA => __('Long Text'),
+            self::TYPE_NUMBER   => __('Number'),
+            self::TYPE_IMAGE    => __('Image'),
+            self::TYPE_VIDEO    => __('Video'),
+            self::TYPE_CHECKBOX => __('Checkbox'),
         ];
     }
 
@@ -46,44 +49,44 @@ class HomeSetting extends Model implements HasMedia
     {
         return [
             self::GROUP_HERO => [
-                'title'   => 'بخش هیرو',
-                'summary' => 'تنظیمات بخش هیرو صفحه اصلی',
+                'title'   => __('Hero Section'),
+                'summary' => __('Hero section settings'),
                 'icon'    => 'home',
                 'bg'      => 'primary',
             ],
             self::GROUP_ABOUT => [
-                'title'   => 'بخش درباره ما',
-                'summary' => 'تنظیمات بخش درباره ما',
+                'title'   => __('About Us Section'),
+                'summary' => __('About us section settings'),
                 'icon'    => 'info',
                 'bg'      => 'success',
             ],
             self::GROUP_INFO_BOXES => [
-                'title'   => 'باکس‌های اطلاعاتی',
-                'summary' => 'تنظیمات باکس‌های اطلاعاتی',
+                'title'   => __('Info Boxes'),
+                'summary' => __('Info boxes settings'),
                 'icon'    => 'grid',
                 'bg'      => 'warning',
             ],
             self::GROUP_SERVICES => [
-                'title'   => 'بخش خدمات',
-                'summary' => 'تنظیمات بخش خدمات',
+                'title'   => __('Services Section'),
+                'summary' => __('Services section settings'),
                 'icon'    => 'briefcase',
                 'bg'      => 'info',
             ],
             self::GROUP_WHY_US => [
-                'title'   => 'چرا ما',
-                'summary' => 'تنظیمات بخش چرا ما',
+                'title'   => __('Why Us Section'),
+                'summary' => __('Why us section settings'),
                 'icon'    => 'star',
                 'bg'      => 'danger',
             ],
             self::GROUP_COMPREHENSIVE => [
-                'title'   => 'خدمات جامع',
-                'summary' => 'تنظیمات خدمات جامع',
+                'title'   => __('Comprehensive Services'),
+                'summary' => __('Comprehensive services settings'),
                 'icon'    => 'package',
                 'bg'      => 'secondary',
             ],
             self::GROUP_CONTACT => [
-                'title'   => 'تماس با ما',
-                'summary' => 'تنظیمات بخش تماس',
+                'title'   => __('Contact Section'),
+                'summary' => __('Contact section settings'),
                 'icon'    => 'phone',
                 'bg'      => 'dark',
             ],
@@ -91,14 +94,14 @@ class HomeSetting extends Model implements HasMedia
     }
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('home_setting_files')->singleFile();
+        $this->addMediaCollection('setting_files')->singleFile();
     }
 
     protected static function booted(): void
     {
         static::saved(function (self $setting) {
             if (in_array($setting->type, [self::TYPE_IMAGE, self::TYPE_VIDEO])) {
-                if ($media = $setting->getFirstMedia('home_setting_files')) {
+                if ($media = $setting->getFirstMedia('setting_files')) {
                     $setting->updateQuietly(['value' => $media->getFullUrl()]);
                 }
             }
@@ -106,7 +109,7 @@ class HomeSetting extends Model implements HasMedia
 
         static::deleting(function (self $setting) {
             if (in_array($setting->type, [self::TYPE_IMAGE, self::TYPE_VIDEO])) {
-                $setting->clearMediaCollection('home_setting_files');
+                $setting->clearMediaCollection('setting_files');
             }
         });
     }
