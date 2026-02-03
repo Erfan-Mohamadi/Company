@@ -15,6 +15,12 @@ class Setting extends Model implements HasMedia
         'group', 'name', 'label', 'type', 'value'
     ];
 
+    // Don't cast value automatically - we handle it in the accessor
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
     // Your existing constants for types & groups
     public const TYPE_TEXT     = 'text';
     public const TYPE_TEXTAREA = 'textarea';
@@ -92,25 +98,46 @@ class Setting extends Model implements HasMedia
             ],
         ];
     }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('setting_files')->singleFile();
     }
 
+    /**
+     * Register media conversions
+     */
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        // You can add conversions here if needed
+        // $this->addMediaConversion('thumb')->width(200)->height(200);
+    }
+
     protected static function booted(): void
     {
-        static::saved(function (self $setting) {
-            if (in_array($setting->type, [self::TYPE_IMAGE, self::TYPE_VIDEO])) {
-                if ($media = $setting->getFirstMedia('setting_files')) {
-                    $setting->updateQuietly(['value' => $media->getFullUrl()]);
-                }
-            }
-        });
-
+        // Handle media deletion when setting is deleted
         static::deleting(function (self $setting) {
             if (in_array($setting->type, [self::TYPE_IMAGE, self::TYPE_VIDEO])) {
                 $setting->clearMediaCollection('setting_files');
             }
         });
+    }
+
+    /**
+     * Get the value attribute for image/video types
+     * This will return the media URL if media exists, otherwise return stored value
+     */
+    public function getValueAttribute($value)
+    {
+        // For image and video types, try to get media URL
+        if (in_array($this->type, [self::TYPE_IMAGE, self::TYPE_VIDEO])) {
+            $media = $this->getFirstMedia('setting_files');
+            if ($media) {
+                return $media->getFullUrl();
+            }
+        }
+
+        // Return raw value for all other types (including checkbox)
+        return $value;
     }
 }

@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\Settings\Schemas;
 
 use App\Models\Setting;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Utilities\Get;
@@ -41,23 +41,37 @@ class SettingForm
                 TextInput::make('value')
                     ->label(__('Value'))
                     ->visible(fn (Get $get) => in_array($get('type'), ['text','number']))
+                    ->dehydrated(fn (Get $get) => in_array($get('type'), ['text','number']))
                     ->numeric(fn (Get $get) => $get('type') === 'number'),
 
-                Textarea::make('value')
+                RichEditor::make('value')
                     ->label(__('Value'))
+                    ->columnSpanFull()
                     ->visible(fn (Get $get) => $get('type') === 'textarea')
-                    ->rows(5),
+                    ->dehydrated(fn (Get $get) => $get('type') === 'textarea')
+                    ->resizableImages()
+                    ->toolbarButtons([['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
+                    ['h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd'],
+                    ['blockquote', 'codeBlock', 'bulletList', 'orderedList'],
+                    ['table', 'attachFiles', 'customBlocks', 'mergeTags'],
+                    ['undo', 'redo'],
+                    ])
+                    ->required(false),
 
                 Toggle::make('value')
                     ->label(fn (Get $get) => $get('label') ?: __('Enabled'))
                     ->inline(false)
                     ->helperText(__('Enable or disable this feature'))
                     ->visible(fn (Get $get) => $get('type') === Setting::TYPE_CHECKBOX)
-                    ->afterStateHydrated(function (Toggle $component, $state) {
-                        // Convert string '1'/'0' to boolean for display
-                        $component->state(filled($state) && ($state === '1' || $state === 1 || $state === true));
+                    ->dehydrated(fn (Get $get) => $get('type') === Setting::TYPE_CHECKBOX)
+                    ->afterStateHydrated(function (Toggle $component, $state, $record) {
+                        if ($record && $record->type === Setting::TYPE_CHECKBOX) {
+                            // Convert string '1'/'0' to boolean for display
+                            $value = $record->getRawOriginal('value');
+                            $component->state(filled($value) && ($value === '1' || $value === 1));
+                        }
                     })
-                    ->dehydrateStateUsing(fn ($state): string => $state ? '1' : '0'),
+                    ->dehydrateStateUsing(fn ($state) => $state ? '1' : '0'),
 
                 SpatieMediaLibraryFileUpload::make('file')
                     ->label(__('File (Image or Video)'))
