@@ -36,13 +36,19 @@ class SettingForm
                     ->label(__('Type'))
                     ->options(Setting::getAllTypes())
                     ->required()
-                    ->live(),
+                    ->live()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        // Reset value when type changes to prevent conflicts
+                        $set('value', null);
+                    }),
 
                 TextInput::make('value')
                     ->label(__('Value'))
                     ->visible(fn (Get $get) => in_array($get('type'), ['text','number']))
                     ->dehydrated(fn (Get $get) => in_array($get('type'), ['text','number']))
-                    ->numeric(fn (Get $get) => $get('type') === 'number'),
+                    ->numeric(fn (Get $get) => $get('type') === 'number')
+                    ->required(false)
+                    ->key('value-text'),
 
                 RichEditor::make('value')
                     ->label(__('Value'))
@@ -50,13 +56,18 @@ class SettingForm
                     ->visible(fn (Get $get) => $get('type') === 'textarea')
                     ->dehydrated(fn (Get $get) => $get('type') === 'textarea')
                     ->resizableImages()
-                    ->toolbarButtons([['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
-                    ['h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd'],
-                    ['blockquote', 'codeBlock', 'bulletList', 'orderedList'],
-                    ['table', 'attachFiles', 'customBlocks', 'mergeTags'],
-                    ['undo', 'redo'],
+                    ->toolbarButtons([
+                        ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
+                        ['h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd'],
+                        ['blockquote', 'codeBlock', 'bulletList', 'orderedList'],
+                        ['table', 'attachFiles', 'customBlocks', 'mergeTags'], // attachFiles present
+                        ['undo', 'redo'],
                     ])
-                    ->required(false),
+                    ->fileAttachmentsDisk('public')
+                    ->fileAttachmentsDirectory('editor-attachments')
+                    ->fileAttachmentsVisibility('public')
+                    ->required(false)
+                    ->key('value-richtext'),
 
                 Toggle::make('value')
                     ->label(fn (Get $get) => $get('label') ?: __('Enabled'))
@@ -64,14 +75,15 @@ class SettingForm
                     ->helperText(__('Enable or disable this feature'))
                     ->visible(fn (Get $get) => $get('type') === Setting::TYPE_CHECKBOX)
                     ->dehydrated(fn (Get $get) => $get('type') === Setting::TYPE_CHECKBOX)
-                    ->afterStateHydrated(function (Toggle $component, $state, $record) {
-                        if ($record && $record->type === Setting::TYPE_CHECKBOX) {
-                            // Convert string '1'/'0' to boolean for display
-                            $value = $record->getRawOriginal('value');
-                            $component->state(filled($value) && ($value === '1' || $value === 1));
+                    ->formatStateUsing(function ($state, $record) {
+                        // Only convert for checkbox records
+                        if (!$record || $record->type !== Setting::TYPE_CHECKBOX) {
+                            return false;
                         }
+                        return $state === '1' || $state === 1 || $state === true;
                     })
-                    ->dehydrateStateUsing(fn ($state) => $state ? '1' : '0'),
+                    ->dehydrateStateUsing(fn ($state) => $state ? '1' : '0')
+                    ->key('value-checkbox'),
 
                 SpatieMediaLibraryFileUpload::make('file')
                     ->label(__('File (Image or Video)'))
@@ -82,7 +94,6 @@ class SettingForm
                     ->required(fn (Get $get): bool => in_array($get('type'), [Setting::TYPE_IMAGE, Setting::TYPE_VIDEO]))
                     ->disk('public')
                     ->directory('settings')
-                    ->imageEditor()
                     ->maxSize(20480)
                     ->preserveFilenames(),
             ]);

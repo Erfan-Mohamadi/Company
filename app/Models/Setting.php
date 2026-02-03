@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -101,7 +102,11 @@ class Setting extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
+        // existing single-file collection for the 'file' uploader
         $this->addMediaCollection('setting_files')->singleFile();
+
+        // new collection for rich-editor attachments (multiple files)
+        $this->addMediaCollection('rich_editor');
     }
 
     /**
@@ -121,6 +126,73 @@ class Setting extends Model implements HasMedia
                 $setting->clearMediaCollection('setting_files');
             }
         });
+
+        // After saving, convert any temporary editor uploads into Spatie media.
+        // This enables the "create" flow where the editor uploads before the DB record exists.
+        static::saved(function (self $setting) {
+            // Only for textarea types where images may be embedded in HTML
+            if (($setting->type ?? null) !== self::TYPE_TEXTAREA) {
+                return;
+            }
+
+            // Get the stored HTML value (raw)
+            $html = $setting->getRawOriginal('value') ?? $setting->value ?? '';
+
+            // Find image src attributes
+            if (! preg_match_all('/<img[^>]+src=[\'"](?P<src>[^\'"]+)[\'"][^>]*>/i', $html, $matches)) {
+                return;
+            }
+
+            $srcs = $matches['src'] ?? [];
+            if (empty($srcs)) {
+                return;
+            }
+
+            $tempPrefix = Storage::disk('public')->url('editor/temp'); // e.g. /storage/editor/temp
+            $updatedHtml = $html;
+            $moved = false;
+
+            foreach ($srcs as $src) {
+                // Only handle images uploaded to the temporary editor folder
+                if (strpos($src, $tempPrefix) === false) {
+                    continue;
+                }
+
+                // Derive filename from src URL path
+                $path = parse_url($src, PHP_URL_PATH); // /storage/editor/temp/filename.jpg
+                $filename = basename($path);
+                $localPath = storage_path('app/public/editor/temp/' . $filename);
+
+                if (! file_exists($localPath)) {
+                    continue;
+                }
+
+                try {
+                    // Add the file to Spatie media (uses the existing model)
+                    $media = $setting->addMedia($localPath)->preservingOriginal()->toMediaCollection('rich_editor');
+
+                    // Replace the src with the managed media URL
+                    $newUrl = $media->getFullUrl();
+                    $updatedHtml = str_replace($src, $newUrl, $updatedHtml);
+
+                    // Optionally remove the temporary file
+                    @unlink($localPath);
+
+                    $moved = true;
+                } catch (\Throwable $e) {
+                    // If something goes wrong, skip this file but continue for others.
+                    // You can log here if desired.
+                    \Log::error('Failed moving temp editor file to media library: ' . $e->getMessage());
+                    continue;
+                }
+            }
+
+            if ($moved && $updatedHtml !== $html) {
+                // Save quietly (avoid triggering observers again)
+                $setting->value = $updatedHtml;
+                $setting->saveQuietly();
+            }
+        });
     }
 
     /**
@@ -137,7 +209,8 @@ class Setting extends Model implements HasMedia
             }
         }
 
-        // Return raw value for all other types (including checkbox)
+        // Return raw value for all other types (including textarea and checkbox)
         return $value;
     }
+
 }
