@@ -39,20 +39,32 @@ class Setting extends Model implements HasMedia
 // ─── Setting Groups ────────────────────────────────────────────────
     public const GROUP_HERO          = 'hero';
     public const GROUP_ABOUT         = 'about';
-    public const GROUP_INFO_BOXES    = 'info_boxes';
+    public const GROUP_HOME          = 'home';
     public const GROUP_SERVICES      = 'services';
-    public const GROUP_WHY_US        = 'why_us';
-    public const GROUP_COMPREHENSIVE = 'comprehensive';
+    public const GROUP_SOCIAL        = 'social';
+    public const GROUP_GENERAL       = 'general';
     public const GROUP_CONTACT       = 'contact';
 
     public static function getAllGroups(): array
     {
         return [
+            self::GROUP_GENERAL => [
+                'title'   => __('General section'),
+                'summary' => __('General section settings'),
+                'icon'    => 'package',
+                'bg'      => 'secondary',
+            ],
             self::GROUP_HERO => [
                 'title'   => __('Hero Section'),
                 'summary' => __('Hero section settings'),
                 'icon'    => 'home',
                 'bg'      => 'primary',
+            ],
+            self::GROUP_SOCIAL => [
+                'title'   => __('Social Section'),
+                'summary' => __('Social section settings'),
+                'icon'    => 'star',
+                'bg'      => 'danger',
             ],
             self::GROUP_ABOUT => [
                 'title'   => __('About Us Section'),
@@ -60,9 +72,9 @@ class Setting extends Model implements HasMedia
                 'icon'    => 'info',
                 'bg'      => 'success',
             ],
-            self::GROUP_INFO_BOXES => [
-                'title'   => __('Info Boxes'),
-                'summary' => __('Info boxes settings'),
+            self::GROUP_HOME => [
+                'title'   => __('Home page'),
+                'summary' => __('Home page settings'),
                 'icon'    => 'grid',
                 'bg'      => 'warning',
             ],
@@ -71,18 +83,6 @@ class Setting extends Model implements HasMedia
                 'summary' => __('Services section settings'),
                 'icon'    => 'briefcase',
                 'bg'      => 'info',
-            ],
-            self::GROUP_WHY_US => [
-                'title'   => __('Why Us Section'),
-                'summary' => __('Why us section settings'),
-                'icon'    => 'star',
-                'bg'      => 'danger',
-            ],
-            self::GROUP_COMPREHENSIVE => [
-                'title'   => __('Comprehensive Services'),
-                'summary' => __('Comprehensive services settings'),
-                'icon'    => 'package',
-                'bg'      => 'secondary',
             ],
             self::GROUP_CONTACT => [
                 'title'   => __('Contact Section'),

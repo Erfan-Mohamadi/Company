@@ -7,6 +7,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 
@@ -46,6 +47,17 @@ class SettingForm
                     ->label(__('Value'))
                     ->visible(fn (Get $get) => $get('type') === 'textarea')
                     ->rows(5),
+
+                Toggle::make('value')
+                    ->label(fn (Get $get) => $get('label') ?: __('Enabled'))
+                    ->inline(false)
+                    ->helperText(__('Enable or disable this feature'))
+                    ->visible(fn (Get $get) => $get('type') === Setting::TYPE_CHECKBOX)
+                    ->afterStateHydrated(function (Toggle $component, $state) {
+                        // Convert string '1'/'0' to boolean for display
+                        $component->state(filled($state) && ($state === '1' || $state === 1 || $state === true));
+                    })
+                    ->dehydrateStateUsing(fn ($state): string => $state ? '1' : '0'),
 
                 SpatieMediaLibraryFileUpload::make('file')
                     ->label(__('File (Image or Video)'))
