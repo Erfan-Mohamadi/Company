@@ -14,7 +14,7 @@ class SyncSettingMediaValues extends Command
     {
         $this->info('Syncing setting media values...');
 
-        $settings = Setting::whereIn('type', [Setting::TYPE_IMAGE, Setting::TYPE_VIDEO])->get();
+        $settings = Setting::query()->whereIn('type', [Setting::TYPE_IMAGE, Setting::TYPE_VIDEO])->get();
 
         $synced = 0;
         foreach ($settings as $setting) {
