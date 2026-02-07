@@ -77,6 +77,10 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
 
             ])
+            ->renderHook(
+                'panels::body.end',
+                fn (): string => '<script src="' . asset('assets/editor/ckeditor/ckeditor.js') . '"></script>',
+            )
             ->resourceCreatePageRedirect('index')
             ->resourceEditPageRedirect('index')
             ->authMiddleware([

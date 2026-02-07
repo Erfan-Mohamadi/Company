@@ -3,100 +3,73 @@
 namespace App\Filament\Resources\Settings\Schemas;
 
 use App\Models\Setting;
-use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Schema;
+use Filament\Forms;
+use Filament\Schemas\Components\Form;
+use Illuminate\Support\Str;
 
 class SettingForm
 {
-    public static function configure(Schema $schema): Schema
+    public static function make(Form $form, string $group): Form
     {
-        return $schema
-            ->components([
-                Select::make('group')
-                    ->label(__('Group'))
-                    ->options(collect(Setting::getAllGroups())->mapWithKeys(fn($v, $k) => [$k => $v['title'] ?? $k]))
-                    ->required(),
+        $settingsByType = Setting::query()->where('group', $group)
+            ->get()
+            ->groupBy('type');
 
-                TextInput::make('name')
-                    ->label(__('Name'))
-                    ->required()
-                    ->unique(ignoreRecord: true)
-                    ->alphaDash(),
+        $schema = [];
 
-                TextInput::make('label')
-                    ->label(__('Label'))
-                    ->required(),
+        foreach ($settingsByType as $type => $settings) {
+            foreach ($settings as $setting) {
+                $fieldName = Str::replace('.', '_', $setting->name);
 
-                Select::make('type')
-                    ->label(__('Type'))
-                    ->options(Setting::getAllTypes())
-                    ->required()
-                    ->live()
-                    ->afterStateUpdated(function ($state, callable $set) {
-                        // Reset value when type changes to prevent conflicts
-                        $set('value', null);
-                    }),
+                $component = match ($type) {
+                    Setting::TYPE_TEXT => Forms\Components\TextInput::make($fieldName)
+                        ->label($setting->label)
+                        ->maxLength(191),
 
-                TextInput::make('value')
-                    ->label(__('Value'))
-                    ->visible(fn (Get $get) => in_array($get('type'), ['text','number']))
-                    ->dehydrated(fn (Get $get) => in_array($get('type'), ['text','number']))
-                    ->numeric(fn (Get $get) => $get('type') === 'number')
-                    ->required(false)
-                    ->key('value-text'),
+                    Setting::TYPE_NUMBER => Forms\Components\TextInput::make($fieldName)
+                        ->label($setting->label)
+                        ->numeric()
+                        ->minValue(0),
 
-                RichEditor::make('value')
-                    ->label(__('Value'))
-                    ->columnSpanFull()
-                    ->visible(fn (Get $get) => $get('type') === 'textarea')
-                    ->dehydrated(fn (Get $get) => $get('type') === 'textarea')
-                    ->resizableImages()
-                    ->toolbarButtons([
-                        ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
-                        ['h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd'],
-                        ['blockquote', 'codeBlock', 'bulletList', 'orderedList'],
-                        ['table', 'attachFiles', 'customBlocks', 'mergeTags'], // attachFiles present
-                        ['undo', 'redo'],
-                    ])
-                    ->fileAttachmentsDisk('public')
-                    ->fileAttachmentsDirectory('editor-attachments')
-                    ->fileAttachmentsVisibility('public')
-                    ->required(false)
-                    ->key('value-richtext'),
+                    Setting::TYPE_TEXTAREA => Forms\Components\Textarea::make($fieldName)
+                        ->label($setting->label)
+                        ->rows(6),
 
-                Toggle::make('value')
-                    ->label(fn (Get $get) => $get('label') ?: __('Enabled'))
-                    ->inline(false)
-                    ->helperText(__('Enable or disable this feature'))
-                    ->visible(fn (Get $get) => $get('type') === Setting::TYPE_CHECKBOX)
-                    ->dehydrated(fn (Get $get) => $get('type') === Setting::TYPE_CHECKBOX)
-                    ->formatStateUsing(function ($state, $record) {
-                        // Only convert for checkbox records
-                        if (!$record || $record->type !== Setting::TYPE_CHECKBOX) {
-                            return false;
-                        }
-                        return $state === '1' || $state === 1 || $state === true;
-                    })
-                    ->dehydrateStateUsing(fn ($state) => $state ? '1' : '0')
-                    ->key('value-checkbox'),
+                    Setting::TYPE_IMAGE => Forms\Components\FileUpload::make($fieldName)
+                        ->label($setting->label)
+                        ->image()
+                        ->disk('public')
+                        ->imageEditor()
+                        ->imageCropAspectRatio('16:9') // optional
+                        ->afterStateHydrated(function ($state) use ($setting) {
+                            return $setting->file['url'] ?? null;
+                        })
+                        ->dehydrated(fn ($state): bool => $state instanceof \Illuminate\Http\UploadedFile),
 
-                SpatieMediaLibraryFileUpload::make('file')
-                    ->label(__('File (Image or Video)'))
-                    ->collection('setting_files')
-                    ->image(fn (Get $get): bool => $get('type') === Setting::TYPE_IMAGE)
-                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/webm', 'video/ogg'])
-                    ->visible(fn (Get $get): bool => in_array($get('type'), [Setting::TYPE_IMAGE, Setting::TYPE_VIDEO]))
-                    ->required(fn (Get $get): bool => in_array($get('type'), [Setting::TYPE_IMAGE, Setting::TYPE_VIDEO]))
-                    ->disk('public')
-                    ->directory('settings')
-                    ->maxSize(20480)
-                    ->preserveFilenames(),
-            ]);
+                    Setting::TYPE_VIDEO => Forms\Components\FileUpload::make($fieldName)
+                        ->label($setting->label)
+                        ->acceptedFileTypes(['video/mp4', 'video/webm', 'video/ogg'])
+                        ->afterStateHydrated(function ($state) use ($setting) {
+                            return $setting->file['url'] ?? null;
+                        })
+                        ->dehydrated(fn ($state): bool => $state instanceof \Illuminate\Http\UploadedFile),
 
+                    default => Forms\Components\TextInput::make($fieldName)
+                        ->label($setting->label),
+                };
+
+                // Make large fields span full width
+                if (in_array($type, [Setting::TYPE_TEXTAREA, Setting::TYPE_IMAGE, Setting::TYPE_VIDEO])) {
+                    $component->columnSpan('full');
+                }
+
+                $schema[] = $component;
+            }
+        }
+
+        return $form
+            ->schema($schema)
+            ->statePath('data')
+            ->columns(2); // 2 columns for most fields, full for large ones
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Settings;
 
+use App\Filament\Resources\Settings\Pages\GroupSettings;
+use App\Filament\Resources\Settings\Pages\ListSettings;
 use App\Filament\Resources\Settings\Schemas\SettingForm;
 use App\Filament\Resources\Settings\Tables\SettingsTable;
 use App\Models\Setting;
@@ -52,9 +54,13 @@ class SettingResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'   => Pages\ListSettings::route('/'),
-            'create'  => Pages\CreateSetting::route('/create'),
-            'edit'    => Pages\EditSetting::route('/{record}/edit'),
+            'index' => ListSettings::route('/'),                // group cards
+            'group' => GroupSettings::route('/{group}'),        // per-group form
+            // You can keep 'create' / 'edit' if you want fallback single-record pages later
         ];
+    }
+    public static function getNavigationBadge(): ?string
+    {
+        return null; // or count if you want
     }
 }
