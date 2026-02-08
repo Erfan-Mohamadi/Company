@@ -75,7 +75,6 @@ class AdminPanelProvider extends PanelProvider
                     ),
             ])
             ->navigationGroups([
-
             ])
             ->renderHook(
                 'panels::body.end',

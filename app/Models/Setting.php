@@ -54,60 +54,40 @@ class Setting extends Model implements HasMedia
         ];
     }
 
-    // ───────────────────────────── Groups ──────────────────────────────
-    public const GROUP_GENERAL = 'general';
-    public const GROUP_SOCIAL  = 'social';
-    public const GROUP_RULES   = 'rules';
-    public const GROUP_ABOUT   = 'about';
-    public const GROUP_FOOTER  = 'footer';
-    public const GROUP_HOME    = 'home';
-    public const GROUP_CONTACT = 'contact';
-
+// ───────────────────────────── Groups ──────────────────────────────
+    public const GROUP_GENERAL      = 'general';
+    public const GROUP_BRANDING     = 'branding';
+    public const GROUP_SEO          = 'seo';
+    public const GROUP_HOME         = 'home';
+    public const GROUP_ABOUT        = 'about';
+    public const GROUP_SERVICES     = 'services';
+    public const GROUP_PORTFOLIO    = 'portfolio';
+    public const GROUP_CONTACT      = 'contact';
+    public const GROUP_LEGAL        = 'legal';
+    public const GROUP_SOCIAL       = 'social';
+    public const GROUP_NEWSLETTER   = 'newsletter';
+    public const GROUP_MAINTENANCE  = 'maintenance';
+    public const GROUP_ANALYTICS    = 'analytics';
+    public const GROUP_FOOTER       = 'footer';
+    public const GROUP_PERFORMANCE  = 'performance';
     public static function getAllGroups(): array
     {
         return [
-            self::GROUP_GENERAL => [
-                'title' => __('General Settings'),
-                'summary' => __('General site settings like logo, phone, etc.'),
-                'bg' => 'primary',
-                'icon' => 'information-circle'
-            ],
-            self::GROUP_SOCIAL  => [
-                'title' => __('Social Networks'),
-                'summary' => __('Social networks like Instagram, etc.'),
-                'bg' => 'pink',
-                'icon' => 'share'
-            ],
-            self::GROUP_ABOUT   => [
-                'title' => __('About Us Group'),
-                'summary' => __('About us settings'),
-                'bg' => 'success',
-                'icon' => 'document-text'
-            ],
-            self::GROUP_CONTACT => [
-                'title' => __('Contact Us Group'),
-                'summary' => __('Contact us settings'),
-                'bg' => 'warning',
-                'icon' => 'phone'
-            ],
-            self::GROUP_HOME    => [
-                'title' => __('Home Page Group'),
-                'summary' => __('Home page settings'),
-                'bg' => 'danger',
-                'icon' => 'home'
-            ],
-            self::GROUP_FOOTER  => [
-                'title' => __('Footer Group'),
-                'summary' => __('Site footer settings'),
-                'bg' => 'warning',
-                'icon' => 'list-bullet'
-            ],
-            self::GROUP_RULES   => [
-                'title' => __('Rules and Regulations Group'),
-                'summary' => __('Site rules settings'),
-                'bg' => 'primary',
-                'icon' => 'check-circle'
-            ],
+            'general'     => ['title' => __('General Settings'),          'summary' => __('Basic site information'),                 'bg' => 'primary',   'icon' => 'cog'],
+            'branding'    => ['title' => __('Branding & Appearance'),     'summary' => __('Logo, colors, favicon'),                  'bg' => 'warning',   'icon' => 'paint-brush'],
+            'seo'         => ['title' => __('SEO & Meta'),                'summary' => __('Site title, description, analytics'),     'bg' => 'pink',      'icon' => 'globe-alt'],
+            'home'        => ['title' => __('Homepage'),                  'summary' => __('Hero, sliders, statistics, CTA'),         'bg' => 'success',   'icon' => 'home'],
+            'about'       => ['title' => __('About Us'),                  'summary' => __('Company info, team, timeline'),           'bg' => 'danger',    'icon' => 'users'],
+            'services'    => ['title' => __('Services'),                  'summary' => __('Services list & booking settings'),       'bg' => 'gray',      'icon' => 'briefcase'],
+            'portfolio'   => ['title' => __('Portfolio & Projects'),      'summary' => __('Projects, case studies'),                 'bg' => 'violet',    'icon' => 'folder'],
+            'contact'     => ['title' => __('Contact & Forms'),           'summary' => __('Contact info, forms, map'),               'bg' => 'warning',   'icon' => 'phone'],
+            'legal'       => ['title' => __('Legal & Compliance'),        'summary' => __('Privacy, terms, cookies, GDPR'),          'bg' => 'success',   'icon' => 'shield-check'],
+            'social'      => ['title' => __('Social Networks'),           'summary' => __('Links to social media'),                  'bg' => 'pink',      'icon' => 'share'],
+            'newsletter'  => ['title' => __('Newsletter'),                'summary' => __('Newsletter settings & provider'),         'bg' => 'danger',    'icon' => 'envelope'],
+            'maintenance' => ['title' => __('Maintenance Mode'),          'summary' => __('Maintenance mode & message'),             'bg' => 'gray',      'icon' => 'wrench-screwdriver'],
+            'analytics'   => ['title' => __('Analytics & Integrations'),  'summary' => __('Google Analytics, pixels, etc.'),         'bg' => 'warning',   'icon' => 'chart-bar'],
+            'footer'      => ['title' => __('Footer'),                    'summary' => __('Footer content, links, copyright'),       'bg' => 'primary',   'icon' => 'document-text'],
+            'performance' => ['title' => __('Performance'),               'summary' => __('Caching, image optimization'),            'bg' => 'success',   'icon' => 'bolt'],
         ];
     }
 

@@ -249,4 +249,18 @@ class GroupSettings extends Page implements HasForms
 
         $this->mount($this->group);
     }
+    public function getBreadcrumbs(): array
+    {
+        $groupTitle = Setting::getAllGroups()[$this->group]['title'] ?? $this->group;
+
+        return [
+            SettingResource::getUrl('index') => __('Settings'),
+            '#' => __($groupTitle),
+        ];
+    }
+    public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable|null
+    {
+        $groupTitle = Setting::getAllGroups()[$this->group]['title'] ?? $this->group;
+        return __('Edit Settings') . ' – ' . __($groupTitle);
+    }
 }
