@@ -19,43 +19,43 @@ class SettingForm
         return $form
             ->schema([
                 Forms\Components\Select::make('group')
-                    ->label('گروه')
-                    ->options(collect(Setting::getAllGroups())->mapWithKeys(fn($v, $k) => [$k => $v['title'] ?? $k]))
+                    ->label(__('Group'))
+                    ->options(collect(Setting::getAllGroups())->mapWithKeys(fn($v, $k) => [$k => __($v['title'] ?? $k)]))
                     ->required(),
 
                 Forms\Components\TextInput::make('name')
-                    ->label('نام کلید')
+                    ->label(__('Key Name'))
                     ->required()
                     ->alphaDash()
                     ->unique(Setting::class, 'name', ignoreRecord: true),
 
                 Forms\Components\TextInput::make('label')
-                    ->label('برچسب')
+                    ->label(__('Label'))
                     ->required(),
 
                 Forms\Components\Select::make('type')
-                    ->label('نوع')
+                    ->label(__('Type'))
                     ->options(Setting::getAllTypes())
                     ->required(),
 
                 // Value field – conditional based on type
                 Forms\Components\TextInput::make('value')
-                    ->label('مقدار')
+                    ->label(__('Value'))
                     ->visible(fn ($get) => in_array($get('type'), ['text', 'number']))
                     ->numeric(fn ($get) => $get('type') === 'number'),
 
                 Forms\Components\RichEditor::make('value')
-                    ->label('مقدار')
+                    ->label(__('Value'))
                     ->columnSpanFull()
                     ->visible(fn ($get) => $get('type') === 'textarea'),
 
                 Forms\Components\Toggle::make('value')
-                    ->label(fn ($get) => $get('label') ?: 'فعال / غیرفعال')
+                    ->label(fn ($get) => $get('label') ?: __('Active / Inactive'))
                     ->inline(false)
                     ->visible(fn ($get) => $get('type') === 'toggle'),
 
                 SpatieMediaLibraryFileUpload::make('file')
-                    ->label('فایل (تصویر یا ویدئو)')
+                    ->label(__('File (Image or Video)'))
                     ->collection('setting_files')
                     ->image(fn ($get) => $get('type') === 'image')
                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/webm', 'video/ogg'])

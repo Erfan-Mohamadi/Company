@@ -121,17 +121,17 @@
 
                     {{-- Title --}}
                     <h3 class="card-title">
-                        {{ $options['title'] }}
+                        {{ __($options['title']) }}
                     </h3>
 
                     {{-- Description --}}
                     <p class="card-description">
-                        {{ $options['summary'] }}
+                        {{ __($options['summary']) }}
                     </p>
 
                     {{-- Edit button --}}
                     <a href="{{ SettingResource::getUrl('group', ['group' => $groupKey]) }}" class="edit-button">
-                        ویرایش
+                        {{ __('Edit') }}
                     </a>
                 </div>
             </div>

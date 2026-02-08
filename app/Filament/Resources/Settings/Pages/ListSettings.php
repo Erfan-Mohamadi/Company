@@ -18,7 +18,7 @@ class ListSettings extends ListRecords
 
     public function getTitle(): string
     {
-        return 'تنظیمات';
+        return __('Settings');
     }
 
     public function getGroupsProperty()

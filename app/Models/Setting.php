@@ -6,7 +6,19 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
-
+/**
+ * @property string|null $group
+ * @property string|null $label
+ * @property string $name
+ * @property string $type
+ * @property string|float|int|bool|null $value
+ * @property \Carbon\Carbon|null $created_at
+ * @property \Carbon\Carbon|null $updated_at
+ *
+ * @property-read \Illuminate\Database\Eloquent\Collection|\Spatie\MediaLibrary\MediaCollections\Models\Media[] $media
+ * @method \Spatie\MediaLibrary\MediaCollections\Models\Media|null getFirstMedia(string $collectionName = 'default')
+ * @method string getFirstMediaUrl(string $collectionName = 'default', string $conversion = '')
+ */
 class Setting extends Model implements HasMedia
 {
     use InteractsWithMedia;
@@ -33,12 +45,12 @@ class Setting extends Model implements HasMedia
     public static function getAllTypes(): array
     {
         return [
-            self::TYPE_TEXT     => 'متن کوتاه',
-            self::TYPE_NUMBER   => 'عددی',
-            self::TYPE_TEXTAREA => 'متن بلند (ویرایشگر)',
-            self::TYPE_IMAGE    => 'فایل عکس',
-            self::TYPE_VIDEO    => 'فایل ویدئو',
-            self::TYPE_TOGGLE   => 'تغییر وضعیت (روشن/خاموش)',
+            self::TYPE_TEXT     => __('Short Text'),
+            self::TYPE_NUMBER   => __('Number'),
+            self::TYPE_TEXTAREA => __('Long Text (Editor)'),
+            self::TYPE_IMAGE    => __('Image File'),
+            self::TYPE_VIDEO    => __('Video File'),
+            self::TYPE_TOGGLE   => __('Toggle (On/Off)'),
         ];
     }
 
@@ -54,13 +66,48 @@ class Setting extends Model implements HasMedia
     public static function getAllGroups(): array
     {
         return [
-            self::GROUP_GENERAL => ['title' => 'تنظیمات عمومی',   'summary' => 'تنظیمات عمومی سایت مانند لوگو و تلفن و ...', 'bg' => 'primary', 'icon' => 'information-circle'],
-            self::GROUP_SOCIAL  => ['title' => 'شبکه های اجتماعی', 'summary' => 'شبکه های اجتماعی مانند اینستاگرام و ...', 'bg' => 'pink', 'icon' => 'share'],
-            self::GROUP_ABOUT   => ['title' => 'گروه درباره ما',   'summary' => 'تنظیمات درباره ما', 'bg' => 'success', 'icon' => 'document-text'],
-            self::GROUP_CONTACT => ['title' => 'گروه تماس با ما',  'summary' => 'تنظیمات تماس با ما', 'bg' => 'warning', 'icon' => 'phone'],
-            self::GROUP_HOME    => ['title' => 'گروه صفحه اصلی',  'summary' => 'تنظیمات صفحه اصلی', 'bg' => 'danger', 'icon' => 'home'],
-            self::GROUP_FOOTER  => ['title' => 'گروه فوتر',       'summary' => 'تنظیمات فوتر سایت', 'bg' => 'warning', 'icon' => 'list-bullet'],
-            self::GROUP_RULES   => ['title' => 'گروه قوانین و مقررات', 'summary' => 'تنظیمات قوانین سایت', 'bg' => 'primary', 'icon' => 'check-circle'],
+            self::GROUP_GENERAL => [
+                'title' => __('General Settings'),
+                'summary' => __('General site settings like logo, phone, etc.'),
+                'bg' => 'primary',
+                'icon' => 'information-circle'
+            ],
+            self::GROUP_SOCIAL  => [
+                'title' => __('Social Networks'),
+                'summary' => __('Social networks like Instagram, etc.'),
+                'bg' => 'pink',
+                'icon' => 'share'
+            ],
+            self::GROUP_ABOUT   => [
+                'title' => __('About Us Group'),
+                'summary' => __('About us settings'),
+                'bg' => 'success',
+                'icon' => 'document-text'
+            ],
+            self::GROUP_CONTACT => [
+                'title' => __('Contact Us Group'),
+                'summary' => __('Contact us settings'),
+                'bg' => 'warning',
+                'icon' => 'phone'
+            ],
+            self::GROUP_HOME    => [
+                'title' => __('Home Page Group'),
+                'summary' => __('Home page settings'),
+                'bg' => 'danger',
+                'icon' => 'home'
+            ],
+            self::GROUP_FOOTER  => [
+                'title' => __('Footer Group'),
+                'summary' => __('Site footer settings'),
+                'bg' => 'warning',
+                'icon' => 'list-bullet'
+            ],
+            self::GROUP_RULES   => [
+                'title' => __('Rules and Regulations Group'),
+                'summary' => __('Site rules settings'),
+                'bg' => 'primary',
+                'icon' => 'check-circle'
+            ],
         ];
     }
 
@@ -84,16 +131,61 @@ class Setting extends Model implements HasMedia
             ->nonQueued();
     }
 
-    // ───────────────────────────── Accessors ──────────────────────────────
+    // ───────────────────────────── Mutators & Accessors ──────────────────────────────
 
     /**
-     * For image/video types, return the media URL instead of stored value
-     * This makes it easy to use in frontend: {{ $setting->value }}
+     * Set the value attribute - handle number formatting to avoid scientific notation
+     */
+    public function setValueAttribute($value): void
+    {
+        // Handle null or empty values
+        if ($value === null || $value === '') {
+            $this->attributes['value'] = null;
+            return;
+        }
+
+        // For number types, ensure we store as string to avoid scientific notation
+        if ($this->type === self::TYPE_NUMBER) {
+            // Convert to string and remove scientific notation
+            if (is_numeric($value)) {
+                // Use number_format to prevent scientific notation, remove commas
+                $this->attributes['value'] = str_replace(',', '', number_format((float)$value, 10, '.', ''));
+                // Remove trailing zeros after decimal point
+                $this->attributes['value'] = rtrim(rtrim($this->attributes['value'], '0'), '.');
+            } else {
+                $this->attributes['value'] = $value;
+            }
+            return;
+        }
+
+        // For toggle types, ensure boolean values are stored as 0/1
+        if ($this->type === self::TYPE_TOGGLE) {
+            $this->attributes['value'] = $value ? '1' : '0';
+            return;
+        }
+
+        // For all other types, store as-is
+        $this->attributes['value'] = $value;
+    }
+
+    /**
+     * Get the value attribute - return proper types
      */
     public function getValueAttribute($value)
     {
+        // For image/video types, return the media URL instead of stored value
         if (in_array($this->type, [self::TYPE_IMAGE, self::TYPE_VIDEO])) {
             return $this->getFirstMediaUrl('setting_files') ?: $value;
+        }
+
+        // For number types, return as numeric value (not scientific notation)
+        if ($this->type === self::TYPE_NUMBER && $value !== null) {
+            return $value; // Already stored as string without scientific notation
+        }
+
+        // For toggle types, return as boolean
+        if ($this->type === self::TYPE_TOGGLE) {
+            return $value === '1' || $value === 1 || $value === true || $value === 'true';
         }
 
         return $value;
