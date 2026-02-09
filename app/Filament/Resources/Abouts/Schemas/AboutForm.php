@@ -2,9 +2,10 @@
 
 namespace App\Filament\Resources\Abouts\Schemas;
 
-use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -31,15 +32,44 @@ class AboutForm
                             ->maxLength(255)
                             ->helperText(__('Name of the company founder')),
 
-                        DatePicker::make('founded_year')
-                            ->label(__('Founded Year'))
-                            ->format('Y')
-                            ->displayFormat('Y')
-                            ->helperText(__('Year the company was founded')),
+                        TextInput::make('founded_year')
+                            ->label(__('Founded Year (Shamsi/Jalali)'))
+                            ->numeric()
+                            ->minValue(1200)
+                            ->maxValue(1500)
+                            ->step(1)
+                            ->placeholder(__('e.g : 1402'))
+                            ->suffix(__('Shamsi'))
+                            ->helperText(__('Enter year in Shamsi/Jalali calendar (e.g., 1402)'))
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(function ($state, $set) {
+                                if ($state && is_numeric($state)) {
+                                    // Convert Jalali to Gregorian for display
+                                    $gregorianYear = intval($state) + 621;
+                                    $set('founded_year_gregorian', $gregorianYear);
+                                }
+                            }),
+
+                        TextInput::make('founded_year_gregorian')
+                            ->label(__('Founded Year (Gregorian)'))
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->placeholder(__('Automatically calculated'))
+                            ->suffix(__('Gregorian'))
+                            ->helperText(__('This is automatically converted from Shamsi year')),
+
+                        Select::make('status')
+                            ->label(__('Status'))
+                            ->options([
+                                'draft' => __('Draft'),
+                                'published' => __('Published'),
+                            ])
+                            ->default('draft')
+                            ->required(),
 
                         RichEditor::make('description')
                             ->label(__('Company Description'))
-                            ->columnSpan(3)
+                            ->columnSpan('full')
                             ->resizableImages()
                             ->toolbarButtons([
                                 ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
@@ -81,12 +111,12 @@ class AboutForm
                     ->columnSpan(2)
                     ->collapsed(),
 
-                Section::make('Mission & Vision')
+                Section::make(__('Mission & Vision'))
                     ->description(__('Company mission, vision, and core values'))
                     ->schema([
                         RichEditor::make('mission')
                             ->label(__('Mission'))
-                            ->columnSpan(3)
+                            ->columnSpan('full')
                             ->resizableImages()
                             ->toolbarButtons([
                                 ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
@@ -122,7 +152,7 @@ class AboutForm
 
                         RichEditor::make('vision')
                             ->label(__('Vision'))
-                            ->columnSpan(3)
+                            ->columnSpan('full')
                             ->resizableImages()
                             ->toolbarButtons([
                                 ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
@@ -177,7 +207,7 @@ class AboutForm
                                     ->customTextColors()
                                     ->extraInputAttributes(['style' => 'min-height: 100px;']),
                             ])
-                            ->columnSpan(3)
+                            ->columnSpan('full')
                             ->collapsible()
                             ->itemLabel(fn (array $state): ?string => $state['value_name'] ?? null)
                             ->addActionLabel(__('Add Core Value'))
@@ -190,7 +220,7 @@ class AboutForm
                     ->columnSpan(2)
                     ->collapsed(),
 
-                Section::make('Statistics')
+                Section::make(__('Statistics'))
                     ->description(__('Company statistics and achievements'))
                     ->schema([
                         TextInput::make('employees_count')
@@ -221,7 +251,7 @@ class AboutForm
                     ->columnSpan(2)
                     ->collapsed(),
 
-                Section::make('Media')
+                Section::make(__('Media'))
                     ->description(__('Images, videos, and founder information'))
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('images')
@@ -231,10 +261,12 @@ class AboutForm
                             ->imageEditor()
                             ->multiple()
                             ->maxFiles(10)
-                            ->disk('public')
-                            ->directory('about/images')
-                            ->visibility('public')
                             ->maxSize(5120)
+                            ->reorderable()
+                            ->appendFiles()
+                            ->downloadable()
+                            ->openable()
+                            ->previewable()
                             ->columnSpan('full')
                             ->helperText(__('Upload company images (Maximum size: 5 MB per image, up to 10 images)')),
 
@@ -242,10 +274,10 @@ class AboutForm
                             ->label(__('Company Video'))
                             ->collection('video')
                             ->acceptedFileTypes(['video/mp4', 'video/webm', 'video/ogg'])
-                            ->disk('public')
-                            ->directory('about/videos')
-                            ->visibility('public')
                             ->maxSize(20480)
+                            ->downloadable()
+                            ->openable()
+                            ->previewable()
                             ->columnSpan('full')
                             ->helperText(__('Accepted formats: MP4, WebM, OGG - Maximum size: 20 MB')),
 
@@ -254,16 +286,16 @@ class AboutForm
                             ->collection('founder_image')
                             ->image()
                             ->imageEditor()
-                            ->disk('public')
-                            ->directory('about/founder')
-                            ->visibility('public')
                             ->maxSize(5120)
+                            ->downloadable()
+                            ->openable()
+                            ->previewable()
                             ->columnSpan('full')
                             ->helperText(__('Upload founder photo (Maximum size: 5 MB)')),
 
                         RichEditor::make('founder_message')
                             ->label(__('Founder Message'))
-                            ->columnSpan(3)
+                            ->columnSpan('full')
                             ->resizableImages()
                             ->toolbarButtons([
                                 ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
@@ -299,7 +331,22 @@ class AboutForm
                     ])
                     ->columns([
                         'default' => 1,
-                        'md' => 3,
+                        'md' => 1,
+                    ])
+                    ->columnSpan(2)
+                    ->collapsed(),
+
+                Section::make(__('Additional Information'))
+                    ->description(__('Extra metadata and custom fields'))
+                    ->schema([
+                        KeyValue::make('extra')
+                            ->label(__('Extra Data'))
+                            ->keyLabel(__('Field Name'))
+                            ->valueLabel(__('Field Value'))
+                            ->addActionLabel(__('Add Field'))
+                            ->reorderable()
+                            ->columnSpan('full')
+                            ->helperText(__('Add any additional custom fields as key-value pairs (e.g., "website" → "https://example.com")')),
                     ])
                     ->columnSpan(2)
                     ->collapsed(),

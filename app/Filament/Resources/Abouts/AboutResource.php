@@ -22,6 +22,22 @@ class AboutResource extends Resource
     protected static ?string $recordTitleAttribute = 'about';
     protected static string|null|BackedEnum $navigationIcon = 'heroicon-o-building-office-2';
     protected static string|null|\UnitEnum $navigationGroup = 'Company Profile';
+    protected static ?string $navigationLabel = null;
+    protected static ?string $modelLabel = null;
+    protected static ?string $pluralModelLabel = null;
+    public static function getNavigationLabel(): string
+    {
+        return __('Abouts');
+    }
+    public static function getModelLabel(): string
+    {
+        return __('Abouts');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Abouts');
+    }
     public static function form(Schema $schema): Schema
     {
         return AboutForm::configure($schema);

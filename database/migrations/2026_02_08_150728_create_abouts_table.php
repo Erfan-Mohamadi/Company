@@ -25,6 +25,7 @@ return new class extends Migration
             $table->integer('clients_count')->default(0);
             $table->longText('founder_message')->nullable();
             $table->string('status')->default('draft');        // draft | published
+            $table->json('extra')->nullable();                 // extra data
             $table->timestamps();
         });
     }
