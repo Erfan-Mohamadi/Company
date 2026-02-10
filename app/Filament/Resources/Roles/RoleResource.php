@@ -41,7 +41,10 @@ class RoleResource extends Resource
     use HasShieldFormComponents;
 
     protected static ?string $recordTitleAttribute = 'name';
-
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Permissions');
+    }
     public static function getNavigationLabel(): string
     {
         return __('Roles');

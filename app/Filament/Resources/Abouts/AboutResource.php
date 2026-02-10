@@ -22,6 +22,10 @@ class AboutResource extends Resource
     protected static ?string $recordTitleAttribute = 'about';
     protected static string|null|BackedEnum $navigationIcon = 'heroicon-o-building-office-2';
     protected static string|null|\UnitEnum $navigationGroup = 'Company Profile';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Company Profile');
+    }
     protected static ?string $navigationLabel = null;
     protected static ?string $modelLabel = null;
     protected static ?string $pluralModelLabel = null;

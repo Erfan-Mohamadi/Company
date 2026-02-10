@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('header');
             $table->longText('description')->nullable();
-            $table->year('founded_year')->nullable();
+            $table->date('founded_date')->nullable();
             $table->string('founder_name')->nullable();
             $table->text('mission')->nullable();
             $table->text('vision')->nullable();

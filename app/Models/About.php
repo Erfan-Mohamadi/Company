@@ -13,7 +13,7 @@ class About extends Model implements HasMedia
     protected $fillable = [
         'header',
         'description',
-        'founded_year',
+        'founded_date',
         'founder_name',
         'mission',
         'vision',
@@ -23,7 +23,7 @@ class About extends Model implements HasMedia
         'clients_count',
         'founder_message',
         'status',
-        'extra'
+        'extra',
     ];
 
     protected $casts = [

@@ -314,5 +314,9 @@
     "clients_count" : "clients count",
     "status" : "status",
     "updated_at" : "updated at",
-    "Abouts" : "Abouts"
+    "Abouts" : "Abouts",
+    "Founded Date (Jalali)" : "Founded Date (Jalali)",
+    "Select the founding date in Jalali calendar" : "Select the founding date in Jalali calendar",
+    "founded year (Gregorian)" : "founded year (Gregorian)",
+    "Founded Date" : "Founded Date"
 }

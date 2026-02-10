@@ -307,12 +307,16 @@
     "Automatically calculated" : "محاسبه خودکار",
     "Shamsi" : "شمسی",
     "Gregorian" : "میلادی",
-    "Founded Year (Gregorian)" : "سال تأسیس (میلادی)",
     "e.g : 1402" : "مثال : 1402",
     "header" : "سربرگ",
+    "Founded Year (Gregorian)" : "سال تأسیس (میلادی)",
+    "founded year (Gregorian)" : "سال تأسیس (میلادی)",
     "founded_year" : "سال تأسیس",
     "clients_count" : "تعداد مشتریان",
     "status" : "وضعیت",
     "updated_at" : "به روزرسانی شده در",
-    "Abouts" : "درباره ها"
+    "Abouts" : "درباره ها",
+    "Founded Date (Jalali)" : "تاریخ تأسیس (جلالی)",
+    "Select the founding date in Jalali calendar" : "تاریخ تأسیس را در تقویم جلالی انتخاب کنید",
+    "Founded Date" : "تاریخ تأسیس"
 }

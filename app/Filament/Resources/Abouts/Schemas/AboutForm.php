@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Abouts\Schemas;
 
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
@@ -11,11 +12,14 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\App;
 
 class AboutForm
 {
     public static function configure(Schema $schema): Schema
     {
+        $isFarsi = App::isLocale('fa');
+
         return $schema
             ->components([
                 Section::make(__('Company Overview'))
@@ -32,31 +36,17 @@ class AboutForm
                             ->maxLength(255)
                             ->helperText(__('Name of the company founder')),
 
-                        TextInput::make('founded_year')
-                            ->label(__('Founded Year (Shamsi/Jalali)'))
-                            ->numeric()
-                            ->minValue(1200)
-                            ->maxValue(1500)
-                            ->step(1)
-                            ->placeholder(__('e.g : 1402'))
-                            ->suffix(__('Shamsi'))
-                            ->helperText(__('Enter year in Shamsi/Jalali calendar (e.g., 1402)'))
-                            ->live(onBlur: true)
-                            ->afterStateUpdated(function ($state, $set) {
-                                if ($state && is_numeric($state)) {
-                                    // Convert Jalali to Gregorian for display
-                                    $gregorianYear = intval($state) + 621;
-                                    $set('founded_year_gregorian', $gregorianYear);
-                                }
-                            }),
-
-                        TextInput::make('founded_year_gregorian')
-                            ->label(__('Founded Year (Gregorian)'))
-                            ->disabled()
-                            ->dehydrated(false)
-                            ->placeholder(__('Automatically calculated'))
-                            ->suffix(__('Gregorian'))
-                            ->helperText(__('This is automatically converted from Shamsi year')),
+                        DatePicker::make('founded_date')
+                            ->label($isFarsi ? __('Founded Date (Jalali)') : __('Founded Date (Gregorian)'))
+                            ->format('Y-m-d')                    // always stored in Gregorian
+                            ->displayFormat('Y/m/d')
+                            ->native(false)
+                            ->closeOnDateSelection()
+                            ->helperText($isFarsi
+                                ? __('Select the founding date in Jalali calendar')
+                                : __('Select the founding date in Gregorian calendar')
+                            )
+                            ->when($isFarsi, fn (DatePicker $picker) => $picker->jalali()),
 
                         Select::make('status')
                             ->label(__('Status'))
@@ -102,7 +92,6 @@ class AboutForm
                             ])
                             ->extraInputAttributes(['style' => 'min-height: 140px;'])
                             ->helperText(__('Detailed description of your company')),
-
                     ])
                     ->columns([
                         'default' => 1,
@@ -198,13 +187,34 @@ class AboutForm
                                     ->label(__('Description'))
                                     ->resizableImages()
                                     ->toolbarButtons([
-                                        ['bold', 'italic', 'underline', 'strike', 'link'],
-                                        ['h3', 'alignStart', 'alignCenter', 'alignEnd'],
-                                        ['bulletList', 'orderedList'],
+                                        ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
+                                        ['h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd'],
+                                        ['blockquote', 'codeBlock', 'bulletList', 'orderedList'],
+                                        ['table', 'attachFiles'],
                                         ['undo', 'redo'],
                                     ])
                                     ->textColors([])
                                     ->customTextColors()
+                                    ->floatingToolbars([
+                                        'paragraph' => [
+                                            'h2', 'h3', 'bold', 'italic', 'underline', 'strike', 'subscript', 'superscript',
+                                            'alignStart', 'alignCenter', 'alignEnd', 'alignJustify'
+                                        ],
+                                        'heading' => [
+                                            'h1', 'h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd', 'alignJustify',
+                                            'bold', 'italic', 'underline', 'strike'
+                                        ],
+                                        'table' => [
+                                            'tableAddColumnBefore', 'tableAddColumnAfter', 'tableDeleteColumn',
+                                            'tableAddRowBefore', 'tableAddRowAfter', 'tableDeleteRow',
+                                            'tableMergeCells', 'tableSplitCell',
+                                            'tableToggleHeaderRow', 'tableToggleHeaderCell',
+                                            'tableDelete',
+                                        ],
+                                        'attachFiles' => [
+                                            'alignStart', 'alignCenter', 'alignEnd', 'alignJustify'
+                                        ]
+                                    ])
                                     ->extraInputAttributes(['style' => 'min-height: 100px;']),
                             ])
                             ->columnSpan('full')

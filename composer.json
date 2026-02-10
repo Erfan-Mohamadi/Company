@@ -20,7 +20,7 @@
         "laravel/tinker": "^2.10.1",
         "livewire/livewire": "^3.0",
         "livewire/volt": "^1.7.0",
-        "morilog/jalali": "*",
+        "morilog/jalali": "^3.5",
         "pxlrbt/filament-activity-log": "^2.1",
         "pxlrbt/filament-excel": "^3.4",
         "spatie/eloquent-sortable": "^4.5",
