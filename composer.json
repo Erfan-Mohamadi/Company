@@ -7,6 +7,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "abdulmajeed-jamaan/filament-translatable-tabs": "^4.0",
         "ariaieboy/filament-jalali": "^2.2",
         "bezhansalleh/filament-language-switch": "^4.0",
         "bezhansalleh/filament-shield": "^4.1",
@@ -16,6 +17,7 @@
         "guava/filament-icon-picker": "^3.1",
         "hekmatinasser/verta": "^8.5",
         "jeffgreco13/filament-breezy": "^3.1",
+        "lara-zeus/spatie-translatable": "^1.0",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
         "livewire/livewire": "^3.0",
@@ -24,9 +26,10 @@
         "pxlrbt/filament-activity-log": "^2.1",
         "pxlrbt/filament-excel": "^3.4",
         "spatie/eloquent-sortable": "^4.5",
-        "spatie/laravel-activitylog": "^4.10",
-        "spatie/laravel-medialibrary": "^11.17",
+        "spatie/laravel-activitylog": "^4.11",
+        "spatie/laravel-medialibrary": "^11.19",
         "spatie/laravel-settings": "^3.6",
+        "spatie/laravel-translatable": "^6.12",
         "stechstudio/filament-impersonate": "^4.1",
         "stichoza/google-translate-php": "^5.3"
     },
