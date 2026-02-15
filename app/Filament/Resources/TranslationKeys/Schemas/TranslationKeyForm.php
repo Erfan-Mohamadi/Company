@@ -57,7 +57,7 @@ class TranslationKeyForm
                                 $languages->map(function ($language) {
                                     return Tabs\Tab::make($language->label)
                                         ->icon($language->is_rtl ? 'heroicon-o-arrow-right' : 'heroicon-o-arrow-left')
-                                        ->badge($language->name === Language::MAIN_LANG ? 'Main' : null)
+                                        ->badge($language->name === Language::MAIN_LANG ? __('Main') : null)
                                         ->schema([
                                             Textarea::make("value.{$language->name}")
                                                 ->label(__("Translation"))

@@ -20,9 +20,34 @@ class LanguageResource extends Resource
 {
     protected static ?string $model = Language::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::Language;
 
-    protected static ?string $recordTitleAttribute = 'language';
+    protected static string|null|\UnitEnum $navigationGroup = 'Settings';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Settings');
+    }
+    protected static ?int $navigationSort = 1;
+
+    protected static ?string $recordTitleAttribute = 'label';
+    protected static ?string $navigationLabel = null;
+    protected static ?string $modelLabel = null;
+    protected static ?string $pluralModelLabel = null;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Languages');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Language');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Languages');
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -54,5 +79,10 @@ class LanguageResource extends Resource
             'view' => ViewLanguage::route('/{record}'),
             'edit' => EditLanguage::route('/{record}/edit'),
         ];
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
     }
 }

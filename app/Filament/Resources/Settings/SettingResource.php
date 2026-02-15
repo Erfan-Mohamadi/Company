@@ -21,7 +21,11 @@ class SettingResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
 
     protected static ?string $recordTitleAttribute = 'name';
-
+    protected static string|null|\UnitEnum $navigationGroup = 'Settings';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Settings');
+    }
     protected static ?string $navigationLabel = null;
     protected static ?string $modelLabel = null;
     protected static ?string $pluralModelLabel = null;

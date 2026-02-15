@@ -23,12 +23,31 @@ class TranslationKeyResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static string|null|\UnitEnum $navigationGroup = 'Settings';
-
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Settings');
+    }
     protected static ?int $navigationSort = 2;
 
-    protected static ?string $navigationLabel = 'Translation Keys';
     protected static ?string $recordTitleAttribute = 'translationkey';
+    protected static ?string $navigationLabel = null;
+    protected static ?string $modelLabel = null;
+    protected static ?string $pluralModelLabel = null;
 
+    public static function getNavigationLabel(): string
+    {
+        return __('Translation Keys');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Translation Keys');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Translation Keys');
+    }
     public static function form(Schema $schema): Schema
     {
         return TranslationKeyForm::configure($schema);

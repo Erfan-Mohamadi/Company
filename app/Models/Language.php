@@ -8,6 +8,7 @@ use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Language extends Model implements HasMedia
 {
@@ -34,12 +35,20 @@ class Language extends Model implements HasMedia
             ->setDescriptionForEvent(fn(string $eventName) => "Language {$eventName}");
     }
 
-    // Media Library
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('flag')
             ->singleFile()
-            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
+            ->useDisk('public');
+    }
+
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->addMediaConversion('thumb')
+            ->width(100)
+            ->height(100)
+            ->sharpen(10)
+            ->performOnCollections('flag');
     }
 
     public function getFlagAttribute(): ?string
@@ -48,70 +57,35 @@ class Language extends Model implements HasMedia
         return $media ? $media->getUrl() : null;
     }
 
-    // Static Methods for Filament
+    // ─── Static Helpers ────────────────────────────────────────────────────────
+
     public static function getAllLanguages()
     {
-        return Cache::rememberForever('all_languages', function () {
-            return static::query()->orderBy('name', 'desc')->get();
-        });
+        return Cache::rememberForever('all_languages', fn () =>
+        static::query()->orderBy('name', 'desc')->get()
+        );
     }
 
     public static function getOtherLanguages()
     {
-        return Cache::rememberForever('other_languages', function () {
-            return static::query()
-                ->where('name', '!=', static::MAIN_LANG)
-                ->orderBy('name', 'desc')
-                ->get();
-        });
+        return Cache::rememberForever('other_languages', fn () =>
+        static::query()
+            ->where('name', '!=', static::MAIN_LANG)
+            ->orderBy('name', 'desc')
+            ->get()
+        );
     }
 
     public static function getLanguageKeys(): array
     {
-        return Cache::rememberForever('language_keys', function () {
-            return static::pluck('name')->toArray();
-        });
+        return Cache::rememberForever('language_keys', fn () =>
+        static::pluck('name')->toArray()
+        );
     }
 
-    public static function languageExists(string $language): bool
+    public static function languageExists(string $code): bool
     {
-        return in_array($language, static::getLanguageKeys());
-    }
-
-    // Get locales for Filament Translatable Tabs
-    public static function getLocales(): array
-    {
-        return Cache::rememberForever('locales_for_filament', function () {
-            return static::pluck('label', 'name')->toArray();
-        });
-    }
-
-    // Model Events
-    protected static function booted()
-    {
-        static::created(function () {
-            static::clearAllCaches();
-        });
-
-        static::updated(function () {
-            static::clearAllCaches();
-        });
-
-        static::deleting(function (Language $language) {
-            if (!$language->isDeletable()) {
-                throw new \Exception('Cannot delete the main language.');
-            }
-        });
-
-        static::deleted(function () {
-            static::clearAllCaches();
-        });
-    }
-
-    // Helper Methods
-    public function isDeletable(): bool
-    {
-        return $this->name !== static::MAIN_LANG;
+        return in_array($code, static::getLanguageKeys());
     }
 
     public static function clearAllCaches(): void
@@ -122,8 +96,9 @@ class Language extends Model implements HasMedia
         Cache::forget('locales_for_filament');
     }
 
-    public function getIsMainLanguageAttribute(): bool
+    protected static function booted()
     {
-        return $this->name === static::MAIN_LANG;
+        static::saved(fn () => static::clearAllCaches());
+        static::deleted(fn () => static::clearAllCaches());
     }
 }
