@@ -2,15 +2,16 @@
 
 namespace App\Filament\Resources\Abouts\Schemas;
 
+use App\Models\Language;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\App;
 
@@ -18,27 +19,50 @@ class AboutForm
 {
     public static function configure(Schema $schema): Schema
     {
-        $isFarsi = App::isLocale('fa');
+        $languages = Language::getAllLanguages();
+        $isFarsi   = App::isLocale('fa');
+
+        // ─── Shared RichEditor settings (exactly like your original) ─────────────
+        $toolbarButtons = [
+            ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
+            ['h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd'],
+            ['blockquote', 'codeBlock', 'bulletList', 'orderedList'],
+            ['table', 'attachFiles'],
+            ['undo', 'redo'],
+        ];
+
+        $floatingToolbars = [
+            'paragraph' => [
+                'h2', 'h3', 'bold', 'italic', 'underline', 'strike', 'subscript', 'superscript',
+                'alignStart', 'alignCenter', 'alignEnd', 'alignJustify'
+            ],
+            'heading' => [
+                'h1', 'h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd', 'alignJustify',
+                'bold', 'italic', 'underline', 'strike'
+            ],
+            'table' => [
+                'tableAddColumnBefore', 'tableAddColumnAfter', 'tableDeleteColumn',
+                'tableAddRowBefore', 'tableAddRowAfter', 'tableDeleteRow',
+                'tableMergeCells', 'tableSplitCell',
+                'tableToggleHeaderRow', 'tableToggleHeaderCell',
+                'tableDelete',
+            ],
+            'attachFiles' => [
+                'alignStart', 'alignCenter', 'alignEnd', 'alignJustify'
+            ],
+        ];
+
+        $mainLangIndex = $languages->search(fn ($lang) => $lang->name === Language::MAIN_LANG) + 1 ?: 1;
 
         return $schema
             ->components([
+                // ─── Non-translatable fields ─────────────────────────────────────
                 Section::make(__('Company Overview'))
                     ->description(__('Basic company information and founding details'))
                     ->schema([
-                        TextInput::make('header')
-                            ->label(__('Company Header'))
-                            ->required()
-                            ->maxLength(255)
-                            ->helperText(__('Main title for the about page')),
-
-                        TextInput::make('founder_name')
-                            ->label(__('Founder Name'))
-                            ->maxLength(255)
-                            ->helperText(__('Name of the company founder')),
-
                         DatePicker::make('founded_date')
                             ->label($isFarsi ? __('Founded Date (Jalali)') : __('Founded Date (Gregorian)'))
-                            ->format('Y-m-d')                    // always stored in Gregorian
+                            ->format('Y-m-d')
                             ->displayFormat('Y/m/d')
                             ->native(false)
                             ->closeOnDateSelection()
@@ -51,182 +75,13 @@ class AboutForm
                         Select::make('status')
                             ->label(__('Status'))
                             ->options([
-                                'draft' => __('Draft'),
+                                'draft'     => __('Draft'),
                                 'published' => __('Published'),
                             ])
                             ->default('draft')
                             ->required(),
-
-                        RichEditor::make('description')
-                            ->label(__('Company Description'))
-                            ->columnSpan('full')
-                            ->resizableImages()
-                            ->toolbarButtons([
-                                ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
-                                ['h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd'],
-                                ['blockquote', 'codeBlock', 'bulletList', 'orderedList'],
-                                ['table', 'attachFiles'],
-                                ['undo', 'redo'],
-                            ])
-                            ->textColors([])
-                            ->customTextColors()
-                            ->floatingToolbars([
-                                'paragraph' => [
-                                    'h2', 'h3', 'bold', 'italic', 'underline', 'strike', 'subscript', 'superscript',
-                                    'alignStart', 'alignCenter', 'alignEnd', 'alignJustify'
-                                ],
-                                'heading' => [
-                                    'h1', 'h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd', 'alignJustify',
-                                    'bold', 'italic', 'underline', 'strike'
-                                ],
-                                'table' => [
-                                    'tableAddColumnBefore', 'tableAddColumnAfter', 'tableDeleteColumn',
-                                    'tableAddRowBefore', 'tableAddRowAfter', 'tableDeleteRow',
-                                    'tableMergeCells', 'tableSplitCell',
-                                    'tableToggleHeaderRow', 'tableToggleHeaderCell',
-                                    'tableDelete',
-                                ],
-                                'attachFiles' => [
-                                    'alignStart', 'alignCenter', 'alignEnd', 'alignJustify'
-                                ]
-                            ])
-                            ->extraInputAttributes(['style' => 'min-height: 140px;'])
-                            ->helperText(__('Detailed description of your company')),
                     ])
-                    ->columns([
-                        'default' => 1,
-                        'md' => 3,
-                    ])
-                    ->columnSpan(2)
-                    ->collapsed(),
-
-                Section::make(__('Mission & Vision'))
-                    ->description(__('Company mission, vision, and core values'))
-                    ->schema([
-                        RichEditor::make('mission')
-                            ->label(__('Mission'))
-                            ->columnSpan('full')
-                            ->resizableImages()
-                            ->toolbarButtons([
-                                ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
-                                ['h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd'],
-                                ['blockquote', 'codeBlock', 'bulletList', 'orderedList'],
-                                ['table', 'attachFiles'],
-                                ['undo', 'redo'],
-                            ])
-                            ->textColors([])
-                            ->customTextColors()
-                            ->floatingToolbars([
-                                'paragraph' => [
-                                    'h2', 'h3', 'bold', 'italic', 'underline', 'strike', 'subscript', 'superscript',
-                                    'alignStart', 'alignCenter', 'alignEnd', 'alignJustify'
-                                ],
-                                'heading' => [
-                                    'h1', 'h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd', 'alignJustify',
-                                    'bold', 'italic', 'underline', 'strike'
-                                ],
-                                'table' => [
-                                    'tableAddColumnBefore', 'tableAddColumnAfter', 'tableDeleteColumn',
-                                    'tableAddRowBefore', 'tableAddRowAfter', 'tableDeleteRow',
-                                    'tableMergeCells', 'tableSplitCell',
-                                    'tableToggleHeaderRow', 'tableToggleHeaderCell',
-                                    'tableDelete',
-                                ],
-                                'attachFiles' => [
-                                    'alignStart', 'alignCenter', 'alignEnd', 'alignJustify'
-                                ]
-                            ])
-                            ->extraInputAttributes(['style' => 'min-height: 140px;'])
-                            ->helperText(__('Company mission statement')),
-
-                        RichEditor::make('vision')
-                            ->label(__('Vision'))
-                            ->columnSpan('full')
-                            ->resizableImages()
-                            ->toolbarButtons([
-                                ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
-                                ['h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd'],
-                                ['blockquote', 'codeBlock', 'bulletList', 'orderedList'],
-                                ['table', 'attachFiles'],
-                                ['undo', 'redo'],
-                            ])
-                            ->textColors([])
-                            ->customTextColors()
-                            ->floatingToolbars([
-                                'paragraph' => [
-                                    'h2', 'h3', 'bold', 'italic', 'underline', 'strike', 'subscript', 'superscript',
-                                    'alignStart', 'alignCenter', 'alignEnd', 'alignJustify'
-                                ],
-                                'heading' => [
-                                    'h1', 'h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd', 'alignJustify',
-                                    'bold', 'italic', 'underline', 'strike'
-                                ],
-                                'table' => [
-                                    'tableAddColumnBefore', 'tableAddColumnAfter', 'tableDeleteColumn',
-                                    'tableAddRowBefore', 'tableAddRowAfter', 'tableDeleteRow',
-                                    'tableMergeCells', 'tableSplitCell',
-                                    'tableToggleHeaderRow', 'tableToggleHeaderCell',
-                                    'tableDelete',
-                                ],
-                                'attachFiles' => [
-                                    'alignStart', 'alignCenter', 'alignEnd', 'alignJustify'
-                                ]
-                            ])
-                            ->extraInputAttributes(['style' => 'min-height: 140px;'])
-                            ->helperText(__('Company vision statement')),
-
-                        Repeater::make('core_values')
-                            ->label(__('Core Values'))
-                            ->schema([
-                                TextInput::make('value_name')
-                                    ->label(__('Value Name'))
-                                    ->required()
-                                    ->maxLength(255),
-
-                                RichEditor::make('description')
-                                    ->label(__('Description'))
-                                    ->resizableImages()
-                                    ->toolbarButtons([
-                                        ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
-                                        ['h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd'],
-                                        ['blockquote', 'codeBlock', 'bulletList', 'orderedList'],
-                                        ['table', 'attachFiles'],
-                                        ['undo', 'redo'],
-                                    ])
-                                    ->textColors([])
-                                    ->customTextColors()
-                                    ->floatingToolbars([
-                                        'paragraph' => [
-                                            'h2', 'h3', 'bold', 'italic', 'underline', 'strike', 'subscript', 'superscript',
-                                            'alignStart', 'alignCenter', 'alignEnd', 'alignJustify'
-                                        ],
-                                        'heading' => [
-                                            'h1', 'h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd', 'alignJustify',
-                                            'bold', 'italic', 'underline', 'strike'
-                                        ],
-                                        'table' => [
-                                            'tableAddColumnBefore', 'tableAddColumnAfter', 'tableDeleteColumn',
-                                            'tableAddRowBefore', 'tableAddRowAfter', 'tableDeleteRow',
-                                            'tableMergeCells', 'tableSplitCell',
-                                            'tableToggleHeaderRow', 'tableToggleHeaderCell',
-                                            'tableDelete',
-                                        ],
-                                        'attachFiles' => [
-                                            'alignStart', 'alignCenter', 'alignEnd', 'alignJustify'
-                                        ]
-                                    ])
-                                    ->extraInputAttributes(['style' => 'min-height: 100px;']),
-                            ])
-                            ->columnSpan('full')
-                            ->collapsible()
-                            ->itemLabel(fn (array $state): ?string => $state['value_name'] ?? null)
-                            ->addActionLabel(__('Add Core Value'))
-                            ->helperText(__('Define your company core values')),
-                    ])
-                    ->columns([
-                        'default' => 1,
-                        'md' => 3,
-                    ])
+                    ->columns(['default' => 1, 'md' => 3])
                     ->columnSpan(2)
                     ->collapsed(),
 
@@ -237,32 +92,26 @@ class AboutForm
                             ->label(__('Employees Count'))
                             ->numeric()
                             ->minValue(0)
-                            ->step(1)
-                            ->helperText(__('Total number of employees')),
+                            ->step(1),
 
                         TextInput::make('locations_count')
                             ->label(__('Locations Count'))
                             ->numeric()
                             ->minValue(0)
-                            ->step(1)
-                            ->helperText(__('Number of office locations')),
+                            ->step(1),
 
                         TextInput::make('clients_count')
                             ->label(__('Clients Count'))
                             ->numeric()
                             ->minValue(0)
-                            ->step(1)
-                            ->helperText(__('Total number of clients served')),
+                            ->step(1),
                     ])
-                    ->columns([
-                        'default' => 1,
-                        'md' => 3,
-                    ])
+                    ->columns(['default' => 1, 'md' => 3])
                     ->columnSpan(2)
                     ->collapsed(),
 
                 Section::make(__('Media'))
-                    ->description(__('Images, videos, and founder information'))
+                    ->description(__('Images, videos, and founder photo'))
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('images')
                             ->label(__('Company Images'))
@@ -302,64 +151,121 @@ class AboutForm
                             ->previewable()
                             ->columnSpan('full')
                             ->helperText(__('Upload founder photo (Maximum size: 5 MB)')),
-
-                        RichEditor::make('founder_message')
-                            ->label(__('Founder Message'))
-                            ->columnSpan('full')
-                            ->resizableImages()
-                            ->toolbarButtons([
-                                ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
-                                ['h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd'],
-                                ['blockquote', 'codeBlock', 'bulletList', 'orderedList'],
-                                ['table', 'attachFiles'],
-                                ['undo', 'redo'],
-                            ])
-                            ->textColors([])
-                            ->customTextColors()
-                            ->floatingToolbars([
-                                'paragraph' => [
-                                    'h2', 'h3', 'bold', 'italic', 'underline', 'strike', 'subscript', 'superscript',
-                                    'alignStart', 'alignCenter', 'alignEnd', 'alignJustify'
-                                ],
-                                'heading' => [
-                                    'h1', 'h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd', 'alignJustify',
-                                    'bold', 'italic', 'underline', 'strike'
-                                ],
-                                'table' => [
-                                    'tableAddColumnBefore', 'tableAddColumnAfter', 'tableDeleteColumn',
-                                    'tableAddRowBefore', 'tableAddRowAfter', 'tableDeleteRow',
-                                    'tableMergeCells', 'tableSplitCell',
-                                    'tableToggleHeaderRow', 'tableToggleHeaderCell',
-                                    'tableDelete',
-                                ],
-                                'attachFiles' => [
-                                    'alignStart', 'alignCenter', 'alignEnd', 'alignJustify'
-                                ]
-                            ])
-                            ->extraInputAttributes(['style' => 'min-height: 140px;'])
-                            ->helperText(__('Message from the founder')),
-                    ])
-                    ->columns([
-                        'default' => 1,
-                        'md' => 1,
                     ])
                     ->columnSpan(2)
                     ->collapsed(),
 
-                Section::make(__('Additional Information'))
-                    ->description(__('Extra metadata and custom fields'))
+                // ─── Translations (exactly like TranslationKey style) ─────────────
+                Section::make(__('Translations'))
+                    ->description(__('Provide translations for each language'))
                     ->schema([
-                        KeyValue::make('extra')
-                            ->label(__('Extra Data'))
-                            ->keyLabel(__('Field Name'))
-                            ->valueLabel(__('Field Value'))
-                            ->addActionLabel(__('Add Field'))
-                            ->reorderable()
-                            ->columnSpan('full')
-                            ->helperText(__('Add any additional custom fields as key-value pairs (e.g., "website" → "https://example.com")')),
+                        Tabs::make('Translations')
+                            ->label(__('Translations'))
+                            ->tabs(
+                                $languages->map(function ($language) use ($toolbarButtons, $floatingToolbars) {
+                                    $code    = $language->name;
+                                    $isMain  = $code === Language::MAIN_LANG;
+
+                                    return Tabs\Tab::make($language->label)
+                                        ->icon($language->is_rtl ? 'heroicon-o-arrow-right' : 'heroicon-o-arrow-left')
+                                        ->badge($isMain ? __('Main') : null)
+                                        ->schema([
+                                            TextInput::make("header.{$code}")
+                                                ->label(__('Company Header'))
+                                                ->required($isMain)
+                                                ->maxLength(255)
+                                                ->helperText(__('Main title for the about page')),
+
+                                            TextInput::make("founder_name.{$code}")
+                                                ->label(__('Founder Name'))
+                                                ->maxLength(255)
+                                                ->helperText(__('Name of the company founder')),
+
+                                            RichEditor::make("description.{$code}")
+                                                ->label(__('Company Description'))
+                                                ->columnSpan('full')
+                                                ->resizableImages()
+                                                ->toolbarButtons($toolbarButtons)
+                                                ->textColors([])
+                                                ->customTextColors()
+                                                ->floatingToolbars($floatingToolbars)
+                                                ->extraInputAttributes(['style' => 'min-height: 140px;'])
+                                                ->helperText(__('Detailed description of your company')),
+
+                                            RichEditor::make("mission.{$code}")
+                                                ->label(__('Mission'))
+                                                ->columnSpan('full')
+                                                ->resizableImages()
+                                                ->toolbarButtons($toolbarButtons)
+                                                ->textColors([])
+                                                ->customTextColors()
+                                                ->floatingToolbars($floatingToolbars)
+                                                ->extraInputAttributes(['style' => 'min-height: 140px;'])
+                                                ->helperText(__('Company mission statement')),
+
+                                            RichEditor::make("vision.{$code}")
+                                                ->label(__('Vision'))
+                                                ->columnSpan('full')
+                                                ->resizableImages()
+                                                ->toolbarButtons($toolbarButtons)
+                                                ->textColors([])
+                                                ->customTextColors()
+                                                ->floatingToolbars($floatingToolbars)
+                                                ->extraInputAttributes(['style' => 'min-height: 140px;'])
+                                                ->helperText(__('Company vision statement')),
+
+                                            Repeater::make("core_values.{$code}")
+                                                ->label(__('Core Values'))
+                                                ->schema([
+                                                    TextInput::make('value_name')
+                                                        ->label(__('Value Name'))
+                                                        ->required()
+                                                        ->maxLength(255),
+
+                                                    RichEditor::make('description')
+                                                        ->label(__('Description'))
+                                                        ->resizableImages()
+                                                        ->toolbarButtons($toolbarButtons)
+                                                        ->textColors([])
+                                                        ->customTextColors()
+                                                        ->floatingToolbars($floatingToolbars)
+                                                        ->extraInputAttributes(['style' => 'min-height: 100px;']),
+                                                ])
+                                                ->columnSpan('full')
+                                                ->collapsible()
+                                                ->itemLabel(fn (array $state): ?string => $state['value_name'] ?? null)
+                                                ->addActionLabel(__('Add Core Value'))
+                                                ->helperText(__('Define your company core values')),
+
+                                            RichEditor::make("founder_message.{$code}")
+                                                ->label(__('Founder Message'))
+                                                ->columnSpan('full')
+                                                ->resizableImages()
+                                                ->toolbarButtons($toolbarButtons)
+                                                ->textColors([])
+                                                ->customTextColors()
+                                                ->floatingToolbars($floatingToolbars)
+                                                ->extraInputAttributes(['style' => 'min-height: 140px;'])
+                                                ->helperText(__('Message from the founder')),
+
+                                            KeyValue::make("extra.{$code}")
+                                                ->label(__('Extra Data'))
+                                                ->keyLabel(__('Field Name'))
+                                                ->valueLabel(__('Field Value'))
+                                                ->addActionLabel(__('Add Field'))
+                                                ->reorderable()
+                                                ->columnSpan('full')
+                                                ->helperText(__('Add any additional custom fields as key-value pairs')),
+                                        ]);
+                                })->toArray()
+                            )
+                            ->activeTab($mainLangIndex)
+                            ->columnSpanFull()
+                            ->contained(false),
                     ])
-                    ->columnSpan(2)
-                    ->collapsed(),
+                    ->collapsible()
+                    ->collapsed(false)
+                    ->columnSpanFull(),
             ]);
     }
 }
