@@ -386,5 +386,11 @@
     "updated_at": "به روز شده در",
     "→ RTL Language (Right-to-Left)": "→ زبان RTL (راست به چپ)",
     "⭐ This is the main language": "⭐ این زبان اصلی",
-    "Preview" :"پیش\u200Cنمایش"
+    "Preview" :"پیش\u200Cنمایش",
+    "Core Value" : "ارزش های اصلی",
+    "Display Settings" : "تنضیمات نمایش",
+    "Icon" : "آیکون",
+    "Order" : "ترتیب",
+    "icon name e.g. heroicon-o-heart" : "نام آیکون مثلاً heroicon-o-heart"
+
 }

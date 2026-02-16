@@ -193,5 +193,10 @@
     "e.g., welcome_message, button.submit": "e.g., welcome_message, button.submit",
     "→ RTL Language (Right-to-Left)": "→ RTL Language (Right-to-Left)",
     "⭐ This is the main language": "⭐ This is the main language",
-    "Preview" :"Preview"
+    "Preview" :"Preview",
+    "Core Value" : "Core Value",
+    "Display Settings" : "Display Settings",
+    "Icon" : "Icon",
+    "Order" : "Order",
+    "icon name e.g. heroicon-o-heart" : "icon name e.g. heroicon-o-heart"
 }
