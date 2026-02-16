@@ -11,6 +11,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 
 class TranslationKeyForm
@@ -18,6 +19,7 @@ class TranslationKeyForm
     public static function configure(Schema $schema): Schema
     {
         $languages = Language::getAllLanguages();
+        $isFarsi = App::isLocale('fa');
 
         return $schema
             ->components([
@@ -81,7 +83,15 @@ class TranslationKeyForm
                     ->schema([
                         Placeholder::make('updated_at')
                             ->label(__('Last Updated'))
-                            ->content(fn ($record) => $record?->updated_at?->format('F d, Y H:i:s')),
+                            ->content(function ($record) use ($isFarsi) {
+                                if (! $record?->updated_at) {
+                                    return '-';
+                                }
+
+                                return $isFarsi
+                                    ? verta($record->updated_at)->format('j F Y H:i:s')
+                                    : $record->updated_at->format('F d, Y H:i:s');
+                            }),
                     ])
                     ->hidden(fn ($record) => $record === null)
                     ->collapsible(),

@@ -16,12 +16,14 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Filament\Forms\Components\TextInput;
+use Illuminate\Support\Facades\App;
 
 class TranslationKeysTable
 {
     public static function configure(Table $table): Table
     {
         $languages = Language::getAllLanguages();
+        $isFarsi = App::isLocale('fa');
 
         return $table
             ->columns([
@@ -66,7 +68,11 @@ class TranslationKeysTable
 
                 TextColumn::make('updated_at')
                     ->label(__('Last Updated'))
-                    ->dateTime()
+                    ->date($isFarsi ? 'j F Y' : 'F j, Y')
+                    ->when(
+                        $isFarsi,
+                        fn (TextColumn $column) => $column->jalaliDate('j F Y')
+                    )
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
