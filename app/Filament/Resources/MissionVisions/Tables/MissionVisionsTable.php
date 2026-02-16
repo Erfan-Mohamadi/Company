@@ -52,11 +52,15 @@ class MissionVisionsTable
                 TextColumn::make('status')
                     ->label(__('Status'))
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'draft'     => __('Draft'),
+                        'published' => __('Published'),
+                        default     => $state,
+                    })
+                    ->colors([
                         'draft'     => 'gray',
                         'published' => 'success',
-                        default     => 'gray',
-                    }),
+                    ]),
 
                 TextColumn::make('updated_at')
                     ->label(__('Updated At'))

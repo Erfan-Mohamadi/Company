@@ -198,5 +198,16 @@
     "Display Settings" : "Display Settings",
     "Icon" : "Icon",
     "Order" : "Order",
-    "icon name e.g. heroicon-o-heart" : "icon name e.g. heroicon-o-heart"
+    "icon name e.g. heroicon-o-heart" : "icon name e.g. heroicon-o-heart",
+    "icon name e.g. heroicon-o-target" : "icon name e.g. heroicon-o-target",
+    "Goal / Strategy" : "Goal / Strategy",
+    "Provide content in each language" : "Provide content in each language",
+    "Short Summary / Teaser" : "Short Summary / Teaser",
+    "Display Order" : "Display Order",
+    "goal" : "goal",
+    "strategy" : "strategy",
+    "objective": "objective",
+    "milestone" : "milestone",
+    "Goals & Strategies" : "Goals & Strategies",
+    "Title" : "Title"
 }

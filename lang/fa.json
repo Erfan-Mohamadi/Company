@@ -391,6 +391,16 @@
     "Display Settings" : "تنضیمات نمایش",
     "Icon" : "آیکون",
     "Order" : "ترتیب",
-    "icon name e.g. heroicon-o-heart" : "نام آیکون مثلاً heroicon-o-heart"
-
+    "icon name e.g. heroicon-o-heart" : "نام آیکون مثلاً heroicon-o-heart",
+    "icon name e.g. heroicon-o-target" : "نام آیکون مثلاً heroicon-o-target",
+    "Goal / Strategy" : "هدف / استراتژی",
+    "Provide content in each language" : "ارائه محتوا به هر زبان",
+    "Short Summary / Teaser" : "خلاصه کوتاه / تیزر",
+    "Display Order" : "ترتیب نمایش",
+    "goal" : "مقصد",
+    "strategy" : "استراتژی",
+    "objective": "هدف",
+    "milestone" : "نقطه عطف",
+    "Goals & Strategies" : "اهداف و استراتژی\u200Cها",
+    "Title" : "عنوان"
 }
