@@ -200,6 +200,7 @@
     "Order" : "Order",
     "icon name e.g. heroicon-o-heart" : "icon name e.g. heroicon-o-heart",
     "icon name e.g. heroicon-o-target" : "icon name e.g. heroicon-o-target",
+    "icon name e.g. heroicon-o-circle" : "icon name e.g. heroicon-o-circle",
     "Goal / Strategy" : "Goal / Strategy",
     "Provide content in each language" : "Provide content in each language",
     "Short Summary / Teaser" : "Short Summary / Teaser",
@@ -209,5 +210,15 @@
     "objective": "objective",
     "milestone" : "milestone",
     "Goals & Strategies" : "Goals & Strategies",
-    "Title" : "Title"
+    "Title" : "Title",
+    "Section Content" : "Section Content",
+    "Section Title" : "Section Title",
+    "Advantages / Reasons" : "Advantages / Reasons",
+    "Add items that make your company unique" : "Add items that make your company unique",
+    "Display & Status" : "Display & Status",
+    "Section Icon" : "Section Icon",
+    "Item Title" : "Item Title",
+    "Items" : "Items",
+    "Add New Advantage" : "Add New Advantage",
+    "Advantages Count" : "Advantages Count"
 }
