@@ -35,6 +35,13 @@ class GoalStrategiesTable
                 TextColumn::make('type')
                     ->label(__('Type'))
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'goal'     => __('goal'),
+                        'strategy' => __('strategy'),
+                        'objective' => __('objective'),
+                        'milestone' => __('milestone'),
+                        default     => $state,
+                    })
                     ->color(fn (string $state): string => match ($state) {
                         'goal'      => 'info',
                         'strategy'  => 'warning',

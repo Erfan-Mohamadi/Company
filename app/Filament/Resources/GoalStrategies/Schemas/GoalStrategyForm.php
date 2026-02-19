@@ -102,10 +102,10 @@ class GoalStrategyForm
                         Select::make('type')
                             ->label(__('Type'))
                             ->options([
-                                'goal'      => __('Goal'),
-                                'strategy'  => __('Strategy'),
-                                'objective' => __('Objective'),
-                                'milestone' => __('Milestone'),
+                                'goal'      => __('goal'),
+                                'strategy'  => __('strategy'),
+                                'objective' => __('objective'),
+                                'milestone' => __('milestone'),
                             ])
                             ->default('goal')
                             ->required(),
