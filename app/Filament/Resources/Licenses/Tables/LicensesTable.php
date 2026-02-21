@@ -40,7 +40,16 @@ class LicensesTable
                     ->label(__('Expiry Date'))
                     ->date($isFarsi ? 'j F Y' : 'M j, Y')
                     ->sortable()
-                    ->color(fn ($record) => $record->expiry_date?->isPast() ? 'danger' : 'success'),
+                    ->color(fn ($record) => match (true) {
+                        !$record->expiry_date => 'gray',
+                        $record->expiry_date->isPast() => 'danger',
+                        $record->expiry_date->isFuture() => 'success',
+                        default => 'warning',
+                    })
+                    ->when(
+                        $isFarsi,
+                        fn (TextColumn $column) => $column->jalaliDate('j F Y')
+                    ),
 
                 TextColumn::make('status')
                     ->label(__('Status'))
@@ -54,6 +63,12 @@ class LicensesTable
                         'draft'     => 'gray',
                         'published' => 'success',
                     ]),
+
+                TextColumn::make('order')
+                    ->label(__('Order'))
+                    ->sortable()
+                    ->alignCenter()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('order', 'asc')
             ->filters([
@@ -73,9 +88,9 @@ class LicensesTable
                     ]),
             ])
             ->recordActions([
+                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
-                ViewAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

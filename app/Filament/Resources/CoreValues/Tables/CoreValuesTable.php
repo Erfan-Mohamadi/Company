@@ -2,6 +2,11 @@
 
 namespace App\Filament\Resources\CoreValues\Tables;
 
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -17,18 +22,22 @@ class CoreValuesTable
             ->columns([
                 TextColumn::make('value_name')
                     ->label(__('Value Name'))
-                    ->getStateUsing(fn($record) => $record->getTranslation('value_name', App::getLocale()) ?? '—')
-                    ->searchable(),
+                    ->getStateUsing(fn ($record) => $record->getTranslation('value_name', App::getLocale()) ?? '—')
+                    ->searchable()
+                    ->sortable()
+                    ->limit(50)
+                    ->tooltip(fn ($state): ?string => $state),
 
                 TextColumn::make('description')
                     ->label(__('Description'))
-                    ->limit(80)
-                    ->tooltip(fn($state) => $state),
+                    ->limit(100)
+                    ->tooltip(fn ($state): ?string => strip_tags($state)),
 
                 TextColumn::make('icon')
                     ->label(__('Icon'))
-                    ->formatStateUsing(fn($state) => $state ? "<span class=\"text-xl\">{$state}</span>" : '—')
-                    ->html(),
+                    ->formatStateUsing(fn ($state) => $state ? "<span class=\"text-2xl\">{$state}</span>" : '—')
+                    ->html()
+                    ->alignCenter(),
 
                 TextColumn::make('order')
                     ->label(__('Order'))
@@ -47,12 +56,33 @@ class CoreValuesTable
                         'draft'     => 'gray',
                         'published' => 'success',
                     ]),
-                TextColumn::make('created_at')
-                    ->label(__('Created'))
-                    ->dateTime($isFarsi ? 'j F Y' : 'M j, Y')
-                    ->when($isFarsi, fn(TextColumn $c) => $c->jalaliDate('j F Y'))
-                    ->sortable(),
+
+                TextColumn::make('updated_at')
+                    ->label(__('Updated At'))
+                    ->dateTime($isFarsi ? 'j F Y H:i' : 'M j, Y H:i')
+                    ->sortable()
+                    ->when(
+                        $isFarsi,
+                        fn (TextColumn $column) => $column->jalaliDateTime('j F Y H:i')
+                    ),
             ])
-            ->defaultSort('order', 'asc');
+            ->defaultSort('order', 'asc')
+            ->filters([
+                SelectFilter::make('status')
+                    ->options([
+                        'draft'     => __('Draft'),
+                        'published' => __('Published'),
+                    ]),
+            ])
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
+                ViewAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
     }
 }

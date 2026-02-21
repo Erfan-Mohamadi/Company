@@ -9,6 +9,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
+use Guava\IconPicker\Forms\Components\IconPicker;
 use Illuminate\Support\Facades\App;
 
 class CoreValueForm
@@ -16,23 +17,23 @@ class CoreValueForm
     public static function configure(Schema $schema): Schema
     {
         $languages = Language::getAllLanguages();
-        $isFarsi = App::isLocale('fa');
 
-        $toolbar = [
+        $toolbarButtons = [
             ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
             ['h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd'],
             ['blockquote', 'codeBlock', 'bulletList', 'orderedList'],
             ['table', 'attachFiles'],
             ['undo', 'redo'],
-             ];
-        $floating = [
+        ];
+
+        $floatingToolbars = [
             'paragraph' => [
                 'h2', 'h3', 'bold', 'italic', 'underline', 'strike', 'subscript', 'superscript',
-                'alignStart', 'alignCenter', 'alignEnd', 'alignJustify'
+                'alignStart', 'alignCenter', 'alignEnd', 'alignJustify',
             ],
             'heading' => [
                 'h1', 'h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd', 'alignJustify',
-                'bold', 'italic', 'underline', 'strike'
+                'bold', 'italic', 'underline', 'strike',
             ],
             'table' => [
                 'tableAddColumnBefore', 'tableAddColumnAfter', 'tableDeleteColumn',
@@ -41,61 +42,84 @@ class CoreValueForm
                 'tableToggleHeaderRow', 'tableToggleHeaderCell',
                 'tableDelete',
             ],
-            'attachFiles' => [
-                'alignStart', 'alignCenter', 'alignEnd', 'alignJustify'
-            ],
-            ];
+            'attachFiles' => ['alignStart', 'alignCenter', 'alignEnd', 'alignJustify'],
+        ];
 
-        $mainIndex = $languages->search(fn($l) => $l->name === Language::MAIN_LANG) + 1 ?: 1;
+        $mainLangIndex = $languages->search(fn ($lang) => $lang->name === Language::MAIN_LANG) + 1 ?: 1;
 
-        return $schema->components([
-            Section::make(__('Translations'))
-                ->schema([
-                    Tabs::make('translations')
-                        ->tabs(
-                            $languages->map(fn($lang) => Tabs\Tab::make($lang->label)
-                                ->icon($lang->is_rtl ? 'heroicon-o-arrow-right' : 'heroicon-o-arrow-left')
-                                ->badge($lang->name === Language::MAIN_LANG ? __('Main') : null)
-                                ->schema([
-                                    TextInput::make("value_name.{$lang->name}")
-                                        ->label(__('Value Name'))
-                                        ->required($lang->name === Language::MAIN_LANG)
-                                        ->maxLength(255),
+        return $schema
+            ->components([
+                Tabs::make('Core Value Content')
+                    ->tabs([
+                        // ─── Tab 1: Translations ─────────────────────────────────
+                        Tabs\Tab::make(__('Translations'))
+                            ->icon('heroicon-o-language')
+                            ->schema([
+                                Tabs::make('Translations')
+                                    ->tabs(
+                                        $languages->map(function ($language) use ($toolbarButtons, $floatingToolbars) {
+                                            $code   = $language->name;
+                                            $isMain = $code === Language::MAIN_LANG;
 
-                                    RichEditor::make("description.{$lang->name}")
-                                        ->label(__('Description'))
-                                        ->columnSpanFull()
-                                        ->toolbarButtons($toolbar)
-                                        ->textColors([])
-                                        ->customTextColors()
-                                        ->floatingToolbars($floating)
-                                        ->extraInputAttributes(['style' => 'min-height: 160px;']),
-                                ])
-                            )->toArray()
-                        )
-                        ->activeTab($mainIndex)
-                        ->contained(false),
-                ])
-                ->collapsible(false),
+                                            return Tabs\Tab::make($language->label)
+                                                ->icon($language->is_rtl ? 'heroicon-o-arrow-right' : 'heroicon-o-arrow-left')
+                                                ->badge($isMain ? __('Main') : null)
+                                                ->schema([
+                                                    TextInput::make("value_name.{$code}")
+                                                        ->label(__('Value Name'))
+                                                        ->required($isMain)
+                                                        ->maxLength(255),
 
-            Section::make(__('Display Settings'))
-                ->schema([
-                    TextInput::make('icon')
-                        ->label(__('Icon'))
-                        ->helperText(__('icon name e.g. heroicon-o-heart')),
+                                                    RichEditor::make("description.{$code}")
+                                                        ->label(__('Description'))
+                                                        ->columnSpanFull()
+                                                        ->resizableImages()
+                                                        ->toolbarButtons($toolbarButtons)
+                                                        ->textColors([])
+                                                        ->customTextColors()
+                                                        ->floatingToolbars($floatingToolbars)
+                                                        ->extraInputAttributes(['style' => 'min-height: 180px;']),
+                                                ]);
+                                        })->toArray()
+                                    )
+                                    ->activeTab($mainLangIndex)
+                                    ->contained(false)
+                                    ->columnSpanFull(),
+                            ]),
 
-                    TextInput::make('order')
-                        ->label(__('Order'))
-                        ->numeric()
-                        ->default(0),
+                        // ─── Tab 2: Display Settings ────────────────────────────
+                        Tabs\Tab::make(__('Display Settings'))
+                            ->icon('heroicon-o-cog-6-tooth')
+                            ->schema([
+                                IconPicker::make('icon')
+                                    ->label(__('Icon'))
+                                    ->listSearchResults()
+                                    ->sets(['heroicons', 'filament'])
+                                    ->closeOnSelect()
+                                    ->gridSearchResults()
+                                    ->iconsSearchResults()
+                                    ->gridSearchResults()
+                                    ->extraAttributes([
+                                        'style' => 'max-height: 50vh; overflow: auto'
+                                    ]),
 
-                    Select::make('status')
-                        ->label(__('Status'))
-                        ->options(['draft' => __('Draft'), 'published' => __('Published')])
-                        ->default('draft')
-                        ->required(),
-                ])
-                ->columns(3),
-        ]);
+                                TextInput::make('order')
+                                    ->label(__('Display Order'))
+                                    ->numeric()
+                                    ->default(0),
+
+                                Select::make('status')
+                                    ->label(__('Status'))
+                                    ->options([
+                                        'draft'     => __('Draft'),
+                                        'published' => __('Published'),
+                                    ])
+                                    ->default('draft')
+                                    ->required(),
+                            ])
+                            ->columns(3),
+                    ])
+                    ->columnSpanFull(),
+            ]);
     }
 }

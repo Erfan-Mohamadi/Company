@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\MissionVisions\Schemas;
 
 use App\Models\Language;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
@@ -20,7 +21,6 @@ class MissionVisionForm
         $languages = Language::getAllLanguages();
         $isFarsi   = App::isLocale('fa');
 
-        // RichEditor toolbar configuration — matching your previous style
         $toolbarButtons = [
             ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
             ['h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd'],
@@ -32,11 +32,11 @@ class MissionVisionForm
         $floatingToolbars = [
             'paragraph' => [
                 'h2', 'h3', 'bold', 'italic', 'underline', 'strike', 'subscript', 'superscript',
-                'alignStart', 'alignCenter', 'alignEnd', 'alignJustify'
+                'alignStart', 'alignCenter', 'alignEnd', 'alignJustify',
             ],
             'heading' => [
                 'h1', 'h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd', 'alignJustify',
-                'bold', 'italic', 'underline', 'strike'
+                'bold', 'italic', 'underline', 'strike',
             ],
             'table' => [
                 'tableAddColumnBefore', 'tableAddColumnAfter', 'tableDeleteColumn',
@@ -45,133 +45,126 @@ class MissionVisionForm
                 'tableToggleHeaderRow', 'tableToggleHeaderCell',
                 'tableDelete',
             ],
-            'attachFiles' => [
-                'alignStart', 'alignCenter', 'alignEnd', 'alignJustify'
-            ],
+            'attachFiles' => ['alignStart', 'alignCenter', 'alignEnd', 'alignJustify'],
         ];
 
-        // Try to activate main language tab by default
         $mainLangIndex = $languages->search(fn ($lang) => $lang->name === Language::MAIN_LANG) + 1 ?: 1;
 
         return $schema
             ->components([
+                Tabs::make('Milestone Content')
+                    ->tabs([
+                        // ─── Tab 1: Translations ─────────────────────────────────
+                        Tabs\Tab::make(__('Translations'))
+                            ->icon('heroicon-o-language')
+                            ->schema([
+                                Tabs::make('Translations')
+                                    ->tabs(
+                                        $languages->map(function ($language) use ($toolbarButtons, $floatingToolbars) {
+                                            $code   = $language->name;
+                                            $isMain = $code === Language::MAIN_LANG;
 
+                                            return Tabs\Tab::make($language->label)
+                                                ->icon($language->is_rtl ? 'heroicon-o-arrow-right' : 'heroicon-o-arrow-left')
+                                                ->badge($isMain ? __('Main') : null)
+                                                ->schema([
+                                                    TextInput::make("title.{$code}")
+                                                        ->label(__('Title'))
+                                                        ->required($isMain)
+                                                        ->maxLength(255),
 
-                // ─── Language-specific content ──────────────────────────────────────
-                Section::make(__('Content Translations'))
-                    ->description(__('Mission, vision and descriptions in each language'))
-                    ->schema([
-                        Tabs::make('translations')
-                            ->label(__('Translations'))
-                            ->tabs(
-                                $languages->map(function ($language) use ($toolbarButtons, $floatingToolbars) {
-                                    $code   = $language->name;
-                                    $isMain = $code === Language::MAIN_LANG;
+                                                    RichEditor::make("description.{$code}")
+                                                        ->label(__('Description'))
+                                                        ->columnSpanFull()
+                                                        ->resizableImages()
+                                                        ->toolbarButtons($toolbarButtons)
+                                                        ->textColors([])
+                                                        ->customTextColors()
+                                                        ->floatingToolbars($floatingToolbars)
+                                                        ->extraInputAttributes(['style' => 'min-height: 180px;']),
 
-                                    return Tabs\Tab::make($language->label)
-                                        ->icon($language->is_rtl ? 'heroicon-o-arrow-right' : 'heroicon-o-arrow-left')
-                                        ->badge($isMain ? __('Main') : null)
-                                        ->schema([
-                                            TextInput::make("header.{$code}")
-                                                ->label(__('Header'))
-                                                ->maxLength(255)
-                                                ->helperText(__('Optional main title for this section')),
+                                                    RichEditor::make("impact_description.{$code}")
+                                                        ->label(__('Impact'))
+                                                        ->columnSpanFull()
+                                                        ->resizableImages()
+                                                        ->toolbarButtons($toolbarButtons)
+                                                        ->textColors([])
+                                                        ->customTextColors()
+                                                        ->floatingToolbars($floatingToolbars)
+                                                        ->extraInputAttributes(['style' => 'min-height: 140px;']),
+                                                ]);
+                                        })->toArray()
+                                    )
+                                    ->activeTab($mainLangIndex)
+                                    ->contained(false)
+                                    ->columnSpanFull(),
+                            ]),
 
-                                            TextInput::make("vision_title.{$code}")
-                                                ->label(__('Vision Title'))
-                                                ->maxLength(255),
+                        // ─── Tab 2: Timeline ────────────────────────────────────
+                        Tabs\Tab::make(__('Timeline'))
+                            ->icon('heroicon-o-calendar')
+                            ->schema([
+                                DatePicker::make('date')
+                                    ->label(__('Date'))
+                                    ->displayFormat($isFarsi ? 'Y/m/d' : 'd M Y')
+                                    ->native(false)
+                                    ->closeOnDateSelection()
+                                    ->helperText($isFarsi ? __('Select date in Jalali calendar') : __('Select the milestone date'))
+                                    ->when($isFarsi, fn (DatePicker $picker) => $picker->jalali())
+                                    ->required(),
 
-                                            RichEditor::make("vision_text.{$code}")
-                                                ->label(__('Vision Text'))
-                                                ->columnSpanFull()
-                                                ->resizableImages()
-                                                ->toolbarButtons($toolbarButtons)
-                                                ->textColors([])
-                                                ->customTextColors()
-                                                ->floatingToolbars($floatingToolbars)
-                                                ->extraInputAttributes(['style' => 'min-height: 160px;']),
-
-                                            TextInput::make("mission_title.{$code}")
-                                                ->label(__('Mission Title'))
-                                                ->maxLength(255),
-
-                                            RichEditor::make("mission_text.{$code}")
-                                                ->label(__('Mission Text'))
-                                                ->columnSpanFull()
-                                                ->resizableImages()
-                                                ->toolbarButtons($toolbarButtons)
-                                                ->textColors([])
-                                                ->customTextColors()
-                                                ->floatingToolbars($floatingToolbars)
-                                                ->extraInputAttributes(['style' => 'min-height: 160px;']),
-
-                                            RichEditor::make("short_description.{$code}")
-                                                ->label(__('Short Description'))
-                                                ->columnSpanFull()
-                                                ->resizableImages()
-                                                ->toolbarButtons($toolbarButtons)
-                                                ->textColors([])
-                                                ->customTextColors()
-                                                ->floatingToolbars($floatingToolbars)
-                                                ->extraInputAttributes(['style' => 'min-height: 120px;']),
-                                        ]);
-                                })->toArray()
-                            )
-                            ->activeTab($mainLangIndex)
-                            ->columnSpanFull()
-                            ->contained(false),
-                    ])
-                    ->collapsible()
-                    ->collapsed(false)
-                    ->columnSpanFull(),
-                // ─── Shared fields (not translated) ─────────────────────────────────
-                Section::make(__('Media'))
-                    ->description(__('Images and optional video — same for all languages'))
-                    ->schema([
-                        SpatieMediaLibraryFileUpload::make('images')
-                            ->label(__('Images'))
-                            ->collection('images')
-                            ->multiple()
-                            ->maxFiles(5)
-                            ->image()
-                            ->imageEditor()
-                            ->disk('public')
-                            ->directory('mission-vision/images')
-                            ->visibility('public')
-                            ->maxSize(5120)
-                            ->helperText(__('Up to 5 images, max 5 MB each')),
-
-                        SpatieMediaLibraryFileUpload::make('video')
-                            ->label(__('Video'))
-                            ->collection('video')
-                            ->acceptedFileTypes(['video/mp4', 'video/webm'])
-                            ->disk('public')
-                            ->directory('mission-vision/videos')
-                            ->visibility('public')
-                            ->maxSize(20480)
-                            ->helperText(__('Optional video — max 20 MB')),
-                    ])
-                    ->columns(1)
-                    ->collapsible()
-                    ->columnSpanFull(),
-
-                // ─── Publication status (shared) ────────────────────────────────────
-                Section::make(__('Status'))
-                    ->schema([
-                        Select::make('status')
-                            ->label(__('Publication Status'))
-                            ->options([
-                                'draft'     => __('Draft'),
-                                'published' => __('Published'),
+                                Select::make('achievement_type')
+                                    ->label(__('Achievement Type'))
+                                    ->options([
+                                        'product_launch' => __('Product Launch'),
+                                        'expansion'      => __('Expansion'),
+                                        'award'          => __('Award'),
+                                        'partnership'    => __('Partnership'),
+                                        'other'          => __('Other'),
+                                    ]),
                             ])
-                            ->default('draft')
-                            ->required(),
+                            ->columns(2),
+
+                        // ─── Tab 3: Visual ──────────────────────────────────────
+                        Tabs\Tab::make(__('Visual'))
+                            ->icon('heroicon-o-photo')
+                            ->schema([
+                                SpatieMediaLibraryFileUpload::make('image')
+                                    ->label(__('Image'))
+                                    ->collection('image')
+                                    ->image()
+                                    ->imageEditor()
+                                    ->maxSize(5120)
+                                    ->downloadable()
+                                    ->openable()
+                                    ->previewable()
+                                    ->columnSpanFull()
+                                    ->helperText(__('Upload milestone image (Max: 5 MB)')),
+                            ]),
+
+                        // ─── Tab 4: Settings ────────────────────────────────────
+                        Tabs\Tab::make(__('Settings'))
+                            ->icon('heroicon-o-cog-6-tooth')
+                            ->schema([
+                                TextInput::make('order')
+                                    ->label(__('Display Order'))
+                                    ->numeric()
+                                    ->default(0),
+
+                                Select::make('status')
+                                    ->label(__('Status'))
+                                    ->options([
+                                        'draft'     => __('Draft'),
+                                        'published' => __('Published'),
+                                    ])
+                                    ->default('draft')
+                                    ->required(),
+                            ])
+                            ->columns(2),
                     ])
-                    ->collapsible()
                     ->columnSpanFull(),
-
-
             ]);
+
 
     }
 }

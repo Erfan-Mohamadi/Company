@@ -9,6 +9,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -22,16 +23,20 @@ class AwardsTable
 
         return $table
             ->columns([
-                ImageColumn::make('image')
+                SpatieMediaLibraryImageColumn::make('image')
                     ->label(__('Image'))
+                    ->collection('image')
                     ->circular()
-                    ->size(40),
+                    ->size(40)
+                    ->placeholder(__('No image')),
 
                 TextColumn::make('title')
                     ->label(__('Title'))
                     ->getStateUsing(fn ($record) => $record->getTranslation('title', App::getLocale()) ?? '—')
                     ->searchable()
-                    ->limit(40),
+                    ->sortable()
+                    ->limit(40)
+                    ->tooltip(fn ($state): ?string => $state),
 
                 TextColumn::make('awarding_body')
                     ->label(__('Awarding Body'))
@@ -41,7 +46,11 @@ class AwardsTable
                 TextColumn::make('award_date')
                     ->label(__('Date'))
                     ->date($isFarsi ? 'j F Y' : 'M j, Y')
-                    ->sortable(),
+                    ->sortable()
+                    ->when(
+                        $isFarsi,
+                        fn (TextColumn $column) => $column->jalaliDate('j F Y')
+                    ),
 
                 TextColumn::make('category')
                     ->label(__('Category'))
@@ -67,6 +76,12 @@ class AwardsTable
                         'draft'     => 'gray',
                         'published' => 'success',
                     ]),
+
+                TextColumn::make('order')
+                    ->label(__('Order'))
+                    ->sortable()
+                    ->alignCenter()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('award_date', 'desc')
             ->filters([
@@ -80,9 +95,9 @@ class AwardsTable
                     ]),
             ])
             ->recordActions([
+                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
-                ViewAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -65,8 +65,7 @@ class LanguageInfolist
                             ->since(),
                     ])
                     ->columns(2)
-                    ->collapsible()
-                    ->collapsed(),
+                    ->collapsible(),
             ]);
     }
 }

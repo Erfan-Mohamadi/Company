@@ -8,6 +8,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -21,6 +22,12 @@ class CertificationsTable
 
         return $table
             ->columns([
+                SpatieMediaLibraryImageColumn::make('certificate_image')
+                    ->label(__('Certificate Image'))
+                    ->collection('certificate_image')
+                    ->circular()
+                    ->size(40),
+
                 TextColumn::make('title')
                     ->label(__('Title'))
                     ->getStateUsing(fn ($record) => $record->getTranslation('title', App::getLocale()) ?? '—')
@@ -28,19 +35,27 @@ class CertificationsTable
                     ->limit(40),
 
                 TextColumn::make('certification_body')
-                    ->label(__('Body'))
+                    ->label(__('Certification Body'))
                     ->limit(30),
 
                 TextColumn::make('issue_date')
                     ->label(__('Issue Date'))
                     ->date($isFarsi ? 'j F Y' : 'M j, Y')
-                    ->sortable(),
+                    ->sortable()
+                    ->when(
+                        $isFarsi,
+                        fn (TextColumn $column) => $column->jalaliDate('j F Y')
+                    ),
 
                 TextColumn::make('expiry_date')
                     ->label(__('Expiry Date'))
                     ->date($isFarsi ? 'j F Y' : 'M j, Y')
                     ->sortable()
-                    ->color(fn ($record) => $record->expiry_date?->isPast() ? 'danger' : 'success'),
+                    ->color(fn ($record) => $record->expiry_date?->isPast() ? 'danger' : 'success')
+                    ->when(
+                        $isFarsi,
+                        fn (TextColumn $column) => $column->jalaliDate('j F Y')
+                    ),
 
                 IconColumn::make('featured')
                     ->label(__('Featured'))

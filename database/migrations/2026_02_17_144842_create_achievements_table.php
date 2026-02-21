@@ -94,21 +94,6 @@ return new class extends Migration
             $table->index(['status', 'expiry_date']);
         });
 
-        // ---- milestones ----
-        // Note: image managed via Spatie Media Library
-        Schema::create('milestones', function (Blueprint $table) {
-            $table->id();
-            $table->json('title')->nullable();
-            $table->json('description')->nullable();
-            $table->json('impact_description')->nullable();
-            $table->unsignedSmallInteger('year')->nullable();
-            $table->unsignedTinyInteger('month')->nullable();
-            $table->string('achievement_type')->nullable()->comment('product_launch|expansion|award|partnership|other');
-            $table->integer('order')->default(0);
-            $table->string('status')->default('draft');
-            $table->timestamps();
-            $table->index(['year', 'month', 'achievement_type', 'status']);
-        });
     }
 
     public function down(): void

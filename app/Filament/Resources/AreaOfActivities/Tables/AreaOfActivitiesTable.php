@@ -7,7 +7,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -21,8 +21,9 @@ class AreaOfActivitiesTable
 
         return $table
             ->columns([
-                ImageColumn::make('image')
+                SpatieMediaLibraryImageColumn::make('image')
                     ->label(__('Image'))
+                    ->collection('image')
                     ->circular()
                     ->size(40),
 
@@ -31,7 +32,8 @@ class AreaOfActivitiesTable
                     ->getStateUsing(fn ($record) => $record->getTranslation('title', App::getLocale()) ?? '—')
                     ->searchable()
                     ->limit(50)
-                    ->tooltip(fn ($state): ?string => $state),
+                    ->tooltip(fn ($state): ?string => $state)
+                    ->toggleable(isToggledHiddenByDefault: false),
 
                 TextColumn::make('slug')
                     ->label(__('Slug'))
@@ -68,7 +70,10 @@ class AreaOfActivitiesTable
                     ->label(__('Updated At'))
                     ->dateTime($isFarsi ? 'j F Y H:i' : 'M j, Y H:i')
                     ->sortable()
-                    ->when($isFarsi, fn (TextColumn $column) => $column->jalaliDateTime('j F Y H:i')),
+                    ->when(
+                        $isFarsi,
+                        fn (TextColumn $column) => $column->jalaliDateTime('j F Y H:i')
+                    ),
             ])
             ->defaultSort('order', 'asc')
             ->filters([

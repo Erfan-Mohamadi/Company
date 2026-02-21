@@ -487,5 +487,6 @@
     "strategy": "strategy",
     "— Any month —": "— Any month —",
     "→ RTL Language (Right-to-Left)": "→ RTL Language (Right-to-Left)",
-    "⭐ This is the main language": "⭐ This is the main language"
+    "Select the date in Jalali calendar" : "Select the date in Jalali calendar",
+    "Year (Jalali)" : "Year (Jalali)"
 }

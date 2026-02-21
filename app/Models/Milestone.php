@@ -16,8 +16,7 @@ class Milestone extends Model implements HasMedia
         'title',
         'description',
         'impact_description',
-        'year',
-        'month',
+        'date',
         'achievement_type',
         'order',
         'status',
@@ -30,8 +29,6 @@ class Milestone extends Model implements HasMedia
     ];
 
     protected $casts = [
-        'year'  => 'integer',
-        'month' => 'integer',
         'order' => 'integer',
     ];
 

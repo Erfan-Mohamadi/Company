@@ -7,6 +7,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -16,52 +17,94 @@ class RepresentationLettersTable
     public static function configure(Table $table): Table
     {
         $isFarsi = App::isLocale('fa');
+
         return $table
             ->columns([
-            TextColumn::make('company_name')
-                ->label(__('Company'))
-                ->getStateUsing(fn ($r) => $r
-                    ->getTranslation('company_name', App::getLocale()) ?? '—')
-                ->searchable()
-                ->limit(35),
-            TextColumn::make('representative_name')
-                ->label(__('Representative'))
-                ->getStateUsing(fn ($r) => $r
-                    ->getTranslation('representative_name', App::getLocale()) ?? '—')
-                ->limit(30),
-            TextColumn::make('territory')
-                ->label(__('Territory'))
-                ->getStateUsing(fn ($r) => $r
-                    ->getTranslation('territory', App::getLocale()) ?? '—')
-                ->badge()
-                ->color('info')
-                ->limit(25),
-            TextColumn::make('issue_date')
-                ->label(__('Issued'))
-                ->date($isFarsi ? 'j F Y' : 'M j, Y')
-                ->sortable(),
-            TextColumn::make('expiry_date')
-                ->label(__('Expires'))
-                ->date($isFarsi ? 'j F Y' : 'M j, Y')
-                ->sortable()
-                ->color(fn ($r) => $r
-                    ->expiry_date?->isPast() ? 'danger' : 'success'),
-            TextColumn::make('status')
-                ->label(__('Status'))
-                ->badge()
+//                SpatieMediaLibraryImageColumn::make('document_preview') // optional – add collection if you later add image preview
+//                ->label(__('Preview'))
+//                    ->collection('document_preview')
+//                    ->circular()
+//                    ->size(40)
+//                    ->placeholder(__('No preview')),
 
-                ->formatStateUsing(fn (string $s): string => match ($s) { 'draft' => __('Draft'), 'published' => __('Published'), default => $s })
+                TextColumn::make('company_name')
+                    ->label(__('Company'))
+                    ->getStateUsing(fn ($record) => $record->getTranslation('company_name', App::getLocale()) ?? '—')
+                    ->searchable()
+                    ->limit(35),
 
-                ->colors(['draft' => 'gray', 'published' => 'success']),
-        ])
+                TextColumn::make('representative_name')
+                    ->label(__('Representative'))
+                    ->getStateUsing(fn ($record) => $record->getTranslation('representative_name', App::getLocale()) ?? '—')
+                    ->limit(30),
 
-        ->defaultSort('order', 'asc')
+                TextColumn::make('territory')
+                    ->label(__('Territory'))
+                    ->getStateUsing(fn ($record) => $record->getTranslation('territory', App::getLocale()) ?? '—')
+                    ->badge()
+                    ->color('info')
+                    ->limit(25),
 
-        ->filters([SelectFilter::make('status')
-            ->options(['draft' => __('Draft'), 'published' => __('Published')])])
+                TextColumn::make('issue_date')
+                    ->label(__('Issued'))
+                    ->date($isFarsi ? 'j F Y' : 'M j, Y')
+                    ->sortable()
+                    ->when(
+                        $isFarsi,
+                        fn (TextColumn $column) => $column->jalaliDate('j F Y')
+                    ),
 
-        ->recordActions([EditAction::make(), DeleteAction::make(), ViewAction::make()])
+                TextColumn::make('expiry_date')
+                    ->label(__('Expires'))
+                    ->date($isFarsi ? 'j F Y' : 'M j, Y')
+                    ->sortable()
+                    ->color(fn ($record) => match (true) {
+                        !$record->expiry_date => 'gray',
+                        $record->expiry_date->isPast() => 'danger',
+                        $record->expiry_date->isFuture() => 'success',
+                        default => 'warning',
+                    })
+                    ->when(
+                        $isFarsi,
+                        fn (TextColumn $column) => $column->jalaliDate('j F Y')
+                    ),
 
-        ->toolbarActions([BulkActionGroup::make([DeleteBulkAction::make()])]);
+                TextColumn::make('status')
+                    ->label(__('Status'))
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'draft'     => __('Draft'),
+                        'published' => __('Published'),
+                        default     => $state,
+                    })
+                    ->colors([
+                        'draft'     => 'gray',
+                        'published' => 'success',
+                    ]),
+
+                TextColumn::make('order')
+                    ->label(__('Order'))
+                    ->sortable()
+                    ->alignCenter()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->defaultSort('order', 'asc')
+            ->filters([
+                SelectFilter::make('status')
+                    ->options([
+                        'draft'     => __('Draft'),
+                        'published' => __('Published'),
+                    ]),
+            ])
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
     }
 }

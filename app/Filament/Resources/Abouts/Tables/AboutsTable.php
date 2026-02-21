@@ -33,7 +33,9 @@ class AboutsTable
                     ),
 
                 TextColumn::make('clients_count')
-                    ->label(__('Clients Count')),
+                    ->label(__('Clients Count'))
+                    ->numeric()     // ← makes it right-aligned with thousands separator
+                    ->sortable(),   // ← very useful for a count column
 
                 TextColumn::make('status')
                     ->label(__('Status'))
