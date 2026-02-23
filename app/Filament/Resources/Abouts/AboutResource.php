@@ -67,4 +67,19 @@ class AboutResource extends Resource
             'edit' => EditAbout::route('/{record}/edit'),
         ];
     }
+    public static function getNavigationBadge(): ?string
+    {
+        $drafts = static::getModel()::where('status', 'draft')->count();
+        if ($drafts) {
+            return $drafts;
+        }
+        return static::getModel()::where('status', 'published')->count() ?: null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return static::getModel()::where('status', 'draft')->exists()
+            ? 'warning'
+            : 'success';
+    }
 }

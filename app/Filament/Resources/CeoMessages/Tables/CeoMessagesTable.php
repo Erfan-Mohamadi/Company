@@ -8,6 +8,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -21,8 +22,9 @@ class CeoMessagesTable
 
         return $table
             ->columns([
-                ImageColumn::make('ceo_image')
+                SpatieMediaLibraryImageColumn::make('ceo_image')
                     ->label(__('Photo'))
+                    ->collection('ceo_image')
                     ->circular()
                     ->size(44),
 
@@ -54,8 +56,12 @@ class CeoMessagesTable
                     ->label(__('Updated At'))
                     ->dateTime($isFarsi ? 'j F Y H:i' : 'M j, Y H:i')
                     ->sortable()
-                    ->when($isFarsi, fn (TextColumn $column) => $column->jalaliDateTime('j F Y H:i')),
+                    ->when(
+                        $isFarsi,
+                        fn (TextColumn $column) => $column->jalaliDateTime('j F Y H:i')
+                    ),
             ])
+            ->defaultSort('id', 'desc') // or 'updated_at', 'desc' if you prefer
             ->filters([
                 SelectFilter::make('status')
                     ->options([
@@ -64,9 +70,9 @@ class CeoMessagesTable
                     ]),
             ])
             ->recordActions([
+                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
-                ViewAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

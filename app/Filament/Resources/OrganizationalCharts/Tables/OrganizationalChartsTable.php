@@ -8,6 +8,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -22,9 +23,11 @@ class OrganizationalChartsTable
 
         return $table
             ->columns([
-                ImageColumn::make('diagram_image')
+                SpatieMediaLibraryImageColumn::make('diagram_image')
                     ->label(__('Diagram'))
-                    ->size(60),
+                    ->collection('diagram')
+                    ->size(60)
+                    ->placeholder(__('No diagram')),
 
                 TextColumn::make('description')
                     ->label(__('Description'))
@@ -48,8 +51,13 @@ class OrganizationalChartsTable
                     ->label(__('Updated At'))
                     ->dateTime($isFarsi ? 'j F Y H:i' : 'M j, Y H:i')
                     ->sortable()
-                    ->when($isFarsi, fn (TextColumn $column) => $column->jalaliDateTime('j F Y H:i')),
+                    ->when(
+                        $isFarsi,
+                        fn (TextColumn $column) => $column->jalaliDateTime('j F Y H:i')
+                    ),
+
             ])
+            ->defaultSort('id', 'asc')
             ->filters([
                 SelectFilter::make('status')
                     ->options([
@@ -58,9 +66,9 @@ class OrganizationalChartsTable
                     ]),
             ])
             ->recordActions([
+                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
-                ViewAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

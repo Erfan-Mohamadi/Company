@@ -18,48 +18,89 @@ class ExportMarketsTable
     {
         return $table
             ->columns([
-            TextColumn::make('country_name')
-                ->label(__('Country'))
-                ->getStateUsing(fn ($r) => $r
-                    ->getTranslation('country_name', App::getLocale()) ?? '—')
-                ->searchable()
-                ->limit(30),
-            TextColumn::make('continent')
-                ->label(__('Continent'))
-                ->badge()
-                ->color('info'),
-            TextColumn::make('export_value')
-                ->label(__('Export Value'))
-                ->money('USD')
-                ->sortable(),
-            TextColumn::make('distributors_count')
-                ->label(__('Distributors'))
-                ->alignCenter()
-                ->sortable(),
-            TextColumn::make('growth_rate')
-                ->label(__('Growth %'))
-                ->formatStateUsing(fn ($s) => $s ? "{$s}%" : '—')
-                ->alignCenter(),
-            TextColumn::make('status')
-                ->label(__('Status'))
-                ->badge()
+                TextColumn::make('country_name')
+                    ->label(__('Country'))
+                    ->getStateUsing(fn ($record) => $record->getTranslation('country_name', App::getLocale()) ?? '—')
+                    ->searchable()
+                    ->limit(30),
 
-                ->formatStateUsing(fn (string $s): string => match ($s) { 'draft' => __('Draft'), 'published' => __('Published'), default => $s })
+                TextColumn::make('continent')
+                    ->label(__('Continent'))
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'Asia'          => __('Asia'),
+                        'Europe'        => __('Europe'),
+                        'Africa'        => __('Africa'),
+                        'North America' => __('North America'),
+                        'South America' => __('South America'),
+                        'Oceania'       => __('Oceania'),
+                        default     => $state,
+                    })
+                    ->color('info'),
 
-                ->colors(['draft' => 'gray', 'published' => 'success']),
-        ])
+                TextColumn::make('export_value')
+                    ->label(__('Export Value'))
+                    ->money('USD')
+                    ->sortable(),
 
+                TextColumn::make('distributors_count')
+                    ->label(__('Distributors'))
+                    ->alignCenter()
+                    ->sortable(),
+
+                TextColumn::make('growth_rate')
+                    ->label(__('Growth %'))
+                    ->formatStateUsing(fn ($state) => $state ? "{$state}%" : '—')
+                    ->alignCenter(),
+
+                TextColumn::make('status')
+                    ->label(__('Status'))
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'draft'     => __('Draft'),
+                        'published' => __('Published'),
+                        default     => $state,
+                    })
+                    ->colors([
+                        'draft'     => 'gray',
+                        'published' => 'success',
+                    ]),
+
+                TextColumn::make('order')
+                    ->label(__('Order'))
+                    ->sortable()
+                    ->alignCenter()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
             ->defaultSort('order', 'asc')
-
             ->filters([
                 SelectFilter::make('continent')
-                    ->options(['Asia' => 'Asia', 'Europe' => 'Europe', 'Africa' => 'Africa', 'North America' => 'North America', 'South America' => 'South America', 'Oceania' => 'Oceania']),
+                    ->label(__('Continent'))
+                    ->options([
+                        'Asia'          => __('Asia'),
+                        'Europe'        => __('Europe'),
+                        'Africa'        => __('Africa'),
+                        'North America' => __('North America'),
+                        'South America' => __('South America'),
+                        'Oceania'       => __('Oceania'),
+                    ]),
+
                 SelectFilter::make('status')
-                    ->options(['draft' => __('Draft'), 'published' => __('Published')]),
+                    ->label(__('Status'))
+                    ->options([
+                        'draft'     => __('Draft'),
+                        'published' => __('Published'),
+                    ]),
             ])
-
-            ->recordActions([EditAction::make(), DeleteAction::make(), ViewAction::make()])
-
-            ->toolbarActions([BulkActionGroup::make([DeleteBulkAction::make()])]);
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
     }
 }

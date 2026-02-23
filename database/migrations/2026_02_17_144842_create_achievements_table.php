@@ -98,7 +98,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('milestones');
         Schema::dropIfExists('representation_letters');
         Schema::dropIfExists('accreditations');
         Schema::dropIfExists('awards');

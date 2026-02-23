@@ -17,7 +17,7 @@ class Dealer extends Model implements HasMedia
         'contact_person', 'email', 'phone',
         'address', 'city', 'province', 'country', 'postal_code',
         'territory', 'contract_start_date', 'contract_end_date',
-        'rating', 'order', 'status',
+        'rating', 'order', 'status','partnership_type',
     ];
 
     public $translatable = ['dealer_name', 'territory'];

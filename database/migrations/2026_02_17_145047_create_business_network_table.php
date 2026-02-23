@@ -66,32 +66,6 @@ return new class extends Migration
             $table->timestamps();
             $table->index(['supply_category', 'country', 'status']);
         });
-
-        // ---- dealers ----
-        // Note: logo managed via Spatie Media Library
-        Schema::create('dealers', function (Blueprint $table) {
-            $table->id();
-            $table->json('dealer_name')->nullable();
-            $table->json('territory')->nullable();
-            $table->string('dealer_code')->nullable()->unique();
-            $table->string('website_url')->nullable();
-            $table->string('contact_person')->nullable();
-            $table->string('email')->nullable();
-            $table->string('phone')->nullable();
-            $table->string('address')->nullable();
-            $table->string('city')->nullable();
-            $table->string('province')->nullable();
-            $table->string('country')->nullable();
-            $table->string('postal_code')->nullable();
-            $table->date('contract_start_date')->nullable();
-            $table->date('contract_end_date')->nullable();
-            $table->unsignedTinyInteger('rating')->nullable()->comment('1-5 stars');
-            $table->integer('order')->default(0);
-            $table->string('status')->default('draft');
-            $table->timestamps();
-            $table->index(['country', 'status', 'contract_end_date']);
-        });
-
         // ---- export_markets ----
         // ExportMarket has no media
         Schema::create('export_markets', function (Blueprint $table) {
@@ -117,7 +91,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('export_markets');
-        Schema::dropIfExists('dealers');
         Schema::dropIfExists('suppliers');
         Schema::dropIfExists('partners');
         Schema::dropIfExists('customers');

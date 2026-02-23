@@ -283,7 +283,7 @@
     "Hero section settings": "تنظیمات بخش قهرمان",
     "Hero, sliders, statistics, CTA": "قهرمان، لغزنده، آمار، CTA",
     "Heroicon name, e.g., heroicon-o-sparkles": "نام قهرمان، به عنوان مثال، herocon-o-sparkles",
-    "History Entry": "مدخل تاریخچه",
+    "History Entry": "ورودی تاریخچه",
     "History Milestone": "دستاورد تاریخ",
     "History Milestones": "دستاوردها تاریخ",
     "Home Page Group": "گروه صفحه اصلی",
@@ -674,5 +674,15 @@
     "→ RTL Language (Right-to-Left)": "→ زبان RTL (راست به چپ)",
     "⭐ This is the main language": "⭐ این زبان اصلی است",
     "Select the date in Jalali calendar" : "تاریخ را در تقویم جلالی انتخاب کنید",
-    "Year (Jalali)" : "سال (شمسی)"
+    "Year (Jalali)" : "سال (شمسی)",
+    "History" : "تاریخچه",
+    "Authorized" : "مجاز",
+    "Exclusive" : "انحصاری",
+    "General" : "عمومی",
+    "Institution" : "موسسه",
+    "Biography" : "زندگینامه",
+    "Education" : "تحصیلات",
+    "Degree" : "مدرک",
+    "Duration" : "مدت زمان",
+    "Experience" : "تجربه"
 }

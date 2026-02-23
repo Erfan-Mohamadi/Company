@@ -3,13 +3,10 @@
 namespace App\Filament\Resources\MissionVisions\Schemas;
 
 use App\Models\Language;
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\App;
@@ -19,7 +16,6 @@ class MissionVisionForm
     public static function configure(Schema $schema): Schema
     {
         $languages = Language::getAllLanguages();
-        $isFarsi   = App::isLocale('fa');
 
         $toolbarButtons = [
             ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
@@ -52,8 +48,9 @@ class MissionVisionForm
 
         return $schema
             ->components([
-                Tabs::make('Milestone Content')
+                Tabs::make('Mission Vision Content')
                     ->tabs([
+
                         // ─── Tab 1: Translations ─────────────────────────────────
                         Tabs\Tab::make(__('Translations'))
                             ->icon('heroicon-o-language')
@@ -68,13 +65,28 @@ class MissionVisionForm
                                                 ->icon($language->is_rtl ? 'heroicon-o-arrow-right' : 'heroicon-o-arrow-left')
                                                 ->badge($isMain ? __('Main') : null)
                                                 ->schema([
-                                                    TextInput::make("title.{$code}")
-                                                        ->label(__('Title'))
+
+                                                    // ── Page Header ──────────────────────────────────────
+                                                    TextInput::make("header.{$code}")
+                                                        ->label(__('Page Header'))
                                                         ->required($isMain)
+                                                        ->maxLength(255)
+                                                        ->columnSpanFull(),
+
+                                                    // ── Short Description ────────────────────────────────
+                                                    TextInput::make("short_description.{$code}")
+                                                        ->label(__('Short Description'))
+                                                        ->maxLength(500)
+                                                        ->columnSpanFull()
+                                                        ->helperText(__('A brief teaser or summary shown in listings')),
+
+                                                    // ── Vision ───────────────────────────────────────────
+                                                    TextInput::make("vision_title.{$code}")
+                                                        ->label(__('Vision Title'))
                                                         ->maxLength(255),
 
-                                                    RichEditor::make("description.{$code}")
-                                                        ->label(__('Description'))
+                                                    RichEditor::make("vision_text.{$code}")
+                                                        ->label(__('Vision Text'))
                                                         ->columnSpanFull()
                                                         ->resizableImages()
                                                         ->toolbarButtons($toolbarButtons)
@@ -83,15 +95,21 @@ class MissionVisionForm
                                                         ->floatingToolbars($floatingToolbars)
                                                         ->extraInputAttributes(['style' => 'min-height: 180px;']),
 
-                                                    RichEditor::make("impact_description.{$code}")
-                                                        ->label(__('Impact'))
+                                                    // ── Mission ──────────────────────────────────────────
+                                                    TextInput::make("mission_title.{$code}")
+                                                        ->label(__('Mission Title'))
+                                                        ->maxLength(255),
+
+                                                    RichEditor::make("mission_text.{$code}")
+                                                        ->label(__('Mission Text'))
                                                         ->columnSpanFull()
                                                         ->resizableImages()
                                                         ->toolbarButtons($toolbarButtons)
                                                         ->textColors([])
                                                         ->customTextColors()
                                                         ->floatingToolbars($floatingToolbars)
-                                                        ->extraInputAttributes(['style' => 'min-height: 140px;']),
+                                                        ->extraInputAttributes(['style' => 'min-height: 180px;']),
+
                                                 ]);
                                         })->toArray()
                                     )
@@ -100,57 +118,51 @@ class MissionVisionForm
                                     ->columnSpanFull(),
                             ]),
 
-                        // ─── Tab 2: Timeline ────────────────────────────────────
-                        Tabs\Tab::make(__('Timeline'))
-                            ->icon('heroicon-o-calendar')
-                            ->schema([
-                                DatePicker::make('date')
-                                    ->label(__('Date'))
-                                    ->displayFormat($isFarsi ? 'Y/m/d' : 'd M Y')
-                                    ->native(false)
-                                    ->closeOnDateSelection()
-                                    ->helperText($isFarsi ? __('Select date in Jalali calendar') : __('Select the milestone date'))
-                                    ->when($isFarsi, fn (DatePicker $picker) => $picker->jalali())
-                                    ->required(),
-
-                                Select::make('achievement_type')
-                                    ->label(__('Achievement Type'))
-                                    ->options([
-                                        'product_launch' => __('Product Launch'),
-                                        'expansion'      => __('Expansion'),
-                                        'award'          => __('Award'),
-                                        'partnership'    => __('Partnership'),
-                                        'other'          => __('Other'),
-                                    ]),
-                            ])
-                            ->columns(2),
-
-                        // ─── Tab 3: Visual ──────────────────────────────────────
-                        Tabs\Tab::make(__('Visual'))
+                        // ─── Tab 2: Media ────────────────────────────────────────
+                        Tabs\Tab::make(__('Media'))
                             ->icon('heroicon-o-photo')
                             ->schema([
-                                SpatieMediaLibraryFileUpload::make('image')
-                                    ->label(__('Image'))
-                                    ->collection('image')
+                                // Multiple images (collection 'images', no singleFile)
+                                SpatieMediaLibraryFileUpload::make('images')
+                                    ->label(__('Images'))
+                                    ->collection('images')
                                     ->image()
                                     ->imageEditor()
+                                    ->multiple()
+                                    ->maxFiles(5)
+                                    ->reorderable()
                                     ->maxSize(5120)
                                     ->downloadable()
                                     ->openable()
                                     ->previewable()
                                     ->columnSpanFull()
-                                    ->helperText(__('Upload milestone image (Max: 5 MB)')),
+                                    ->helperText(__('Upload up to 5 images (Max: 5 MB each)')),
+
+                                // Optional video file upload (collection 'video', singleFile)
+                                SpatieMediaLibraryFileUpload::make('video')
+                                    ->label(__('Video File'))
+                                    ->collection('video')
+                                    ->acceptedFileTypes(['video/mp4', 'video/webm', 'video/ogg'])
+                                    ->maxSize(102400) // 100 MB
+                                    ->downloadable()
+                                    ->openable()
+                                    ->columnSpanFull()
+                                    ->helperText(__('Optional: upload a video file (Max: 100 MB). Use the URL field below for YouTube/Vimeo links instead.')),
+
+                                // External video URL
+                                TextInput::make('video_url')
+                                    ->label(__('External Video URL'))
+                                    ->url()
+                                    ->maxLength(500)
+                                    ->columnSpanFull()
+                                    ->placeholder('https://www.youtube.com/watch?v=...')
+                                    ->helperText(__('YouTube, Vimeo, or any direct video URL')),
                             ]),
 
-                        // ─── Tab 4: Settings ────────────────────────────────────
+                        // ─── Tab 3: Settings ─────────────────────────────────────
                         Tabs\Tab::make(__('Settings'))
                             ->icon('heroicon-o-cog-6-tooth')
                             ->schema([
-                                TextInput::make('order')
-                                    ->label(__('Display Order'))
-                                    ->numeric()
-                                    ->default(0),
-
                                 Select::make('status')
                                     ->label(__('Status'))
                                     ->options([
@@ -159,12 +171,9 @@ class MissionVisionForm
                                     ])
                                     ->default('draft')
                                     ->required(),
-                            ])
-                            ->columns(2),
+                            ]),
                     ])
                     ->columnSpanFull(),
             ]);
-
-
     }
 }

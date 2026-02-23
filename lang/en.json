@@ -488,5 +488,16 @@
     "— Any month —": "— Any month —",
     "→ RTL Language (Right-to-Left)": "→ RTL Language (Right-to-Left)",
     "Select the date in Jalali calendar" : "Select the date in Jalali calendar",
-    "Year (Jalali)" : "Year (Jalali)"
+    "Year (Jalali)" : "Year (Jalali)",
+    "History" : "History",
+    "Authorized" : "Authorized",
+    "Exclusive" : "Exclusive",
+    "General" : "General",
+    "Institution" : "Institution",
+    "Biography" : "Biography",
+    "Education" : "Education",
+    "Degree" : "Degree",
+    "Duration" : "Duration",
+    "Experience" : "Experience"
+
 }

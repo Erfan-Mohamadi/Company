@@ -2,15 +2,11 @@
 
 namespace App\Filament\Resources\MissionVisions\Tables;
 
-use App\Models\Language;
-use App\Models\MissionVision;
-use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -21,75 +17,48 @@ class MissionVisionsTable
 {
     public static function configure(Table $table): Table
     {
-        $isFarsi = App::isLocale('fa');
-
-        $jalaliMonths = [
-            1  => 'فروردین',
-            2  => 'اردیبهشت',
-            3  => 'خرداد',
-            4  => 'تیر',
-            5  => 'مرداد',
-            6  => 'شهریور',
-            7  => 'مهر',
-            8  => 'آبان',
-            9  => 'آذر',
-            10 => 'دی',
-            11 => 'بهمن',
-            12 => 'اسفند',
-        ];
-
         return $table
             ->columns([
-                SpatieMediaLibraryImageColumn::make('image')
+                // First image from the 'images' collection
+                SpatieMediaLibraryImageColumn::make('images')
                     ->label(__('Image'))
-                    ->collection('image')
+                    ->collection('images')
+                    ->conversion('thumb')
                     ->circular()
-                    ->size(40)
-                    ->placeholder(__('No image')),
+                    ->size(40),
 
-                TextColumn::make('date')
-                    ->label(__('Date'))
-                    ->sortable()
-                    ->alignCenter()
-                    ->formatStateUsing(function ($state) use ($isFarsi, $jalaliMonths) {
-                        if (!$state) return '—';
-
-                        $date = $state instanceof \Carbon\Carbon ? $state : \Carbon\Carbon::parse($state);
-
-                        if ($isFarsi && class_exists(\Morilog\Jalali\Jalalian::class)) {
-                            $jalali = \Morilog\Jalali\Jalalian::fromCarbon($date);
-                            return sprintf(
-                                '%s %d %d',
-                                $jalaliMonths[$jalali->getMonth()] ?? '—',
-                                $jalali->getDay(),
-                                $jalali->getYear()
-                            );
-                        }
-
-                        return $date->format('d M Y');
+                // Page header (translatable)
+                TextColumn::make('header')
+                    ->label(__('Header'))
+                    ->getStateUsing(fn ($record) => $record->getTranslation('header', App::getLocale()) ?? '—')
+                    ->searchable(query: function ($query, string $value) {
+                        $query->whereRaw("JSON_SEARCH(LOWER(header), 'one', ?) IS NOT NULL", ['%' . strtolower($value) . '%']);
                     })
-                    ->badge()
-                    ->color('primary'),
-
-                TextColumn::make('title')
-                    ->label(__('Title'))
-                    ->getStateUsing(fn ($record) => $record->getTranslation('title', App::getLocale()) ?? '—')
-                    ->searchable()
                     ->limit(50)
                     ->tooltip(fn ($state): ?string => $state),
 
-                TextColumn::make('achievement_type')
-                    ->label(__('Type'))
-                    ->badge()
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'product_launch' => __('Product Launch'),
-                        'expansion'      => __('Expansion'),
-                        'award'          => __('Award'),
-                        'partnership'    => __('Partnership'),
-                        default          => __('Other'),
-                    })
-                    ->color('warning'),
+                // Vision title (translatable)
+                TextColumn::make('vision_title')
+                    ->label(__('Vision'))
+                    ->getStateUsing(fn ($record) => $record->getTranslation('vision_title', App::getLocale()) ?? '—')
+                    ->limit(40)
+                    ->toggleable(),
 
+                // Mission title (translatable)
+                TextColumn::make('mission_title')
+                    ->label(__('Mission'))
+                    ->getStateUsing(fn ($record) => $record->getTranslation('mission_title', App::getLocale()) ?? '—')
+                    ->limit(40)
+                    ->toggleable(),
+
+                // External video URL indicator
+                TextColumn::make('video_url')
+                    ->label(__('Video'))
+                    ->formatStateUsing(fn ($state) => $state ? '✓' : '—')
+                    ->alignCenter()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                // Status badge
                 TextColumn::make('status')
                     ->label(__('Status'))
                     ->badge()
@@ -98,28 +67,20 @@ class MissionVisionsTable
                         'published' => __('Published'),
                         default     => $state,
                     })
-                    ->colors([
-                        'draft'     => 'gray',
+                    ->color(fn (string $state): string => match ($state) {
                         'published' => 'success',
-                    ]),
+                        default     => 'gray',
+                    }),
 
-                TextColumn::make('order')
-                    ->label(__('Order'))
+                // Timestamps
+                TextColumn::make('updated_at')
+                    ->label(__('Updated'))
+                    ->dateTime('M j, Y')
                     ->sortable()
-                    ->alignCenter()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->defaultSort('date', 'desc')
+            ->defaultSort('id', 'desc')
             ->filters([
-                SelectFilter::make('achievement_type')
-                    ->options([
-                        'product_launch' => __('Product Launch'),
-                        'expansion'      => __('Expansion'),
-                        'award'          => __('Award'),
-                        'partnership'    => __('Partnership'),
-                        'other'          => __('Other'),
-                    ]),
-
                 SelectFilter::make('status')
                     ->options([
                         'draft'     => __('Draft'),
@@ -131,9 +92,10 @@ class MissionVisionsTable
                 EditAction::make(),
                 DeleteAction::make(),
             ])
-
             ->toolbarActions([
-                DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 }

@@ -23,6 +23,9 @@ return new class extends Migration
             $table->string('linkedin_url')->nullable();
             $table->string('twitter_url')->nullable();
             $table->string('facebook_url')->nullable();
+
+            $table->json('education')->nullable()->comment('Translatable: [{degree, institution, year}] per language');
+            $table->json('experience')->nullable()->comment('Translatable: [{role, organization, duration}] per language');
             // Note: image managed via Spatie Media Library
             $table->json('skills')->nullable()->comment('[{name, level}]');
             $table->integer('order')->default(0);

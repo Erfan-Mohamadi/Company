@@ -7,6 +7,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -20,6 +21,13 @@ class DepartmentsTable
 
         return $table
             ->columns([
+                SpatieMediaLibraryImageColumn::make('image')
+                    ->label(__('Image'))
+                    ->collection('image')
+                    ->circular()
+                    ->size(40)
+                    ->placeholder(__('No image')),
+
                 TextColumn::make('name')
                     ->label(__('Department Name'))
                     ->getStateUsing(fn ($record) => $record->getTranslation('name', App::getLocale()) ?? '—')
@@ -53,11 +61,20 @@ class DepartmentsTable
                         'published' => 'success',
                     ]),
 
+                TextColumn::make('order')
+                    ->label(__('Order'))
+                    ->sortable()
+                    ->alignCenter()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
                 TextColumn::make('updated_at')
                     ->label(__('Updated At'))
                     ->dateTime($isFarsi ? 'j F Y H:i' : 'M j, Y H:i')
                     ->sortable()
-                    ->when($isFarsi, fn (TextColumn $column) => $column->jalaliDateTime('j F Y H:i')),
+                    ->when(
+                        $isFarsi,
+                        fn (TextColumn $column) => $column->jalaliDateTime('j F Y H:i')
+                    ),
             ])
             ->defaultSort('order', 'asc')
             ->filters([
@@ -68,9 +85,9 @@ class DepartmentsTable
                     ]),
             ])
             ->recordActions([
+                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
-                ViewAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

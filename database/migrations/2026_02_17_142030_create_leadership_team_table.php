@@ -29,6 +29,9 @@ return new class extends Migration
             $table->boolean('featured')->default(false);
             $table->string('status')->default('draft');
 
+            $table->json('education')->nullable()->comment('Education per language [{degree, institution, year}]');
+            $table->json('experience')->nullable()->comment('Experience per language [{role, organization, duration}]');
+
             $table->timestamps();
 
             $table->index(['department_id', 'featured', 'order', 'status']);

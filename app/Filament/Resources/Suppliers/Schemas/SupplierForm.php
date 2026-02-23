@@ -9,119 +9,159 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\App;
 
 class SupplierForm
 {
     public static function configure(Schema $schema): Schema
     {
-        $languages     = Language::getAllLanguages();
+        $languages = Language::getAllLanguages();
+        $isFarsi   = App::isLocale('fa');
+
+        $toolbarButtons = [
+            ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
+            ['h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd'],
+            ['blockquote', 'codeBlock', 'bulletList', 'orderedList'],
+            ['table', 'attachFiles'],
+            ['undo', 'redo'],
+        ];
+
+        $floatingToolbars = [
+            'paragraph' => [
+                'h2', 'h3', 'bold', 'italic', 'underline', 'strike', 'subscript', 'superscript',
+                'alignStart', 'alignCenter', 'alignEnd', 'alignJustify',
+            ],
+            'heading' => [
+                'h1', 'h2', 'h3', 'alignStart', 'alignCenter', 'alignEnd', 'alignJustify',
+                'bold', 'italic', 'underline', 'strike',
+            ],
+            'table' => [
+                'tableAddColumnBefore', 'tableAddColumnAfter', 'tableDeleteColumn',
+                'tableAddRowBefore', 'tableAddRowAfter', 'tableDeleteRow',
+                'tableMergeCells', 'tableSplitCell',
+                'tableToggleHeaderRow', 'tableToggleHeaderCell',
+                'tableDelete',
+            ],
+            'attachFiles' => ['alignStart', 'alignCenter', 'alignEnd', 'alignJustify'],
+        ];
+
         $mainLangIndex = $languages->search(fn ($lang) => $lang->name === Language::MAIN_LANG) + 1 ?: 1;
 
         return $schema
             ->components([
-            Section::make(__('Translations'))
+                Tabs::make('Supplier Content')
+                    ->tabs([
+                        // ─── Tab 1: Translations ─────────────────────────────────
+                        Tabs\Tab::make(__('Translations'))
+                            ->icon('heroicon-o-language')
+                            ->schema([
+                                Tabs::make('Translations')
+                                    ->tabs(
+                                        $languages->map(function ($language) use ($toolbarButtons, $floatingToolbars) {
+                                            $code   = $language->name;
+                                            $isMain = $code === Language::MAIN_LANG;
 
-                ->schema([
-                    Tabs::make('Translations')
+                                            return Tabs\Tab::make($language->label)
+                                                ->icon($language->is_rtl ? 'heroicon-o-arrow-right' : 'heroicon-o-arrow-left')
+                                                ->badge($isMain ? __('Main') : null)
+                                                ->schema([
+                                                    TextInput::make("supplier_name.{$code}")
+                                                        ->label(__('Supplier Name'))
+                                                        ->required($isMain)
+                                                        ->maxLength(255),
+                                                ]);
+                                        })->toArray()
+                                    )
+                                    ->activeTab($mainLangIndex)
+                                    ->contained(false)
+                                    ->columnSpanFull(),
+                            ]),
 
-                        ->tabs($languages
-                            ->map(function ($language) {
-                            $code   = $language
-                                ->name;
-                            $isMain = $code === Language::MAIN_LANG;
-                            return Tabs\Tab::make($language
-                                ->label)
+                        // ─── Tab 2: Supplier Info ────────────────────────────────
+                        Tabs\Tab::make(__('Supplier Info'))
+                            ->icon('heroicon-o-information-circle')
+                            ->schema([
+                                TextInput::make('supply_category')
+                                    ->label(__('Supply Category'))
+                                    ->maxLength(100),
 
-                                ->icon($language
-                                    ->is_rtl ? 'heroicon-o-arrow-right' : 'heroicon-o-arrow-left')
+                                SpatieMediaLibraryFileUpload::make('logo')
+                                    ->label(__('Logo'))
+                                    ->collection('logo')
+                                    ->image()
+                                    ->imageEditor()
+                                    ->maxSize(2048)
+                                    ->downloadable()
+                                    ->openable()
+                                    ->previewable()
+                                    ->helperText(__('Upload logo (Max: 2 MB)'))
+                                    ->columnSpanFull(),
+                            ])
+                            ->columns(2),
 
-                                ->badge($isMain ? __('Main') : null)
+                        // ─── Tab 3: Contact ──────────────────────────────────────
+                        Tabs\Tab::make(__('Contact'))
+                            ->icon('heroicon-o-envelope')
+                            ->schema([
+                                TextInput::make('contact_person')
+                                    ->label(__('Contact Person'))
+                                    ->maxLength(255),
 
-                                ->schema([
-                                    TextInput::make("supplier_name.{$code}")
-                                        ->label(__('Supplier Name'))
-                                        ->required($isMain)
-                                        ->maxLength(255),
-                                ]);
-                        })
-                            ->toArray())
+                                TextInput::make('email')
+                                    ->label(__('Email'))
+                                    ->email()
+                                    ->maxLength(255),
 
-                        ->activeTab($mainLangIndex)
-                        ->columnSpanFull()
-                        ->contained(false),
-                ])
-                ->collapsible()
-                ->collapsed(false),
+                                TextInput::make('phone')
+                                    ->label(__('Phone'))
+                                    ->tel()
+                                    ->maxLength(50),
 
-            Section::make(__('Supplier Info'))
+                                TextInput::make('address')
+                                    ->label(__('Address'))
+                                    ->maxLength(500),
 
-                ->schema([
-                    TextInput::make('supply_category')
-                        ->label(__('Supply Category'))
-                        ->maxLength(100),
-                    TextInput::make('website_url')
-                        ->label(__('Website URL'))
-                        ->url()
-                        ->maxLength(500),
-                    SpatieMediaLibraryFileUpload::make('logo')
-                        ->label(__('Logo'))
-                        ->collection('logo')
-                        ->image()
-                        ->imageEditor()
-                        ->maxSize(2048)
-                        ->downloadable()
-                        ->openable()
-                        ->previewable()
-                        ->helperText(__('Upload logo (Max: 2 MB)')),
-                ])
-                ->columns(2)
-                ->collapsible(),
+                                TextInput::make('city')
+                                    ->label(__('City'))
+                                    ->maxLength(100),
 
-            Section::make(__('Contact'))
+                                TextInput::make('country')
+                                    ->label(__('Country'))
+                                    ->maxLength(100),
+                            ])
+                            ->columns(2),
 
-                ->schema([
-                    TextInput::make('contact_person')
-                        ->label(__('Contact Person'))
-                        ->maxLength(255),
-                    TextInput::make('email')
-                        ->label(__('Email'))
-                        ->email()
-                        ->maxLength(255),
-                    TextInput::make('phone')
-                        ->label(__('Phone'))
-                        ->tel()
-                        ->maxLength(50),
-                    TextInput::make('address')
-                        ->label(__('Address'))
-                        ->maxLength(500),
-                    TextInput::make('city')
-                        ->label(__('City'))
-                        ->maxLength(100),
-                    TextInput::make('country')
-                        ->label(__('Country'))
-                        ->maxLength(100),
-                ])
-                ->columns(2)
-                ->collapsible(),
+                        // ─── Tab 4: Rating & Settings ────────────────────────────
+                        Tabs\Tab::make(__('Rating & Settings'))
+                            ->icon('heroicon-o-cog-6-tooth')
+                            ->schema([
+                                Select::make('rating')
+                                    ->label(__('Rating (1-5)'))
+                                    ->options([
+                                        1 => '⭐',
+                                        2 => '⭐⭐',
+                                        3 => '⭐⭐⭐',
+                                        4 => '⭐⭐⭐⭐',
+                                        5 => '⭐⭐⭐⭐⭐',
+                                    ]),
 
-            Section::make(__('Rating & Settings'))
+                                TextInput::make('order')
+                                    ->label(__('Display Order'))
+                                    ->numeric()
+                                    ->default(0),
 
-                ->schema([
-                    Select::make('rating')
-                        ->label(__('Rating (1-5)'))
-
-                        ->options([1 => '⭐', 2 => '⭐⭐', 3 => '⭐⭐⭐', 4 => '⭐⭐⭐⭐', 5 => '⭐⭐⭐⭐⭐']),
-                    TextInput::make('order')
-                        ->label(__('Display Order'))
-                        ->numeric()
-                        ->default(0),
-                    Select::make('status')
-                        ->label(__('Status'))
-                        ->options(['draft' => __('Draft'), 'published' => __('Published')])
-                        ->default('draft')
-                        ->required(),
-                ])
-                ->columns(3),
-        ]);
+                                Select::make('status')
+                                    ->label(__('Status'))
+                                    ->options([
+                                        'draft'     => __('Draft'),
+                                        'published' => __('Published'),
+                                    ])
+                                    ->default('draft')
+                                    ->required(),
+                            ])
+                            ->columns(3),
+                    ])
+                    ->columnSpanFull(),
+            ]);
     }
 }

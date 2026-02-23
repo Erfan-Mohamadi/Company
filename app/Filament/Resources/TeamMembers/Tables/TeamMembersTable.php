@@ -7,11 +7,12 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\App;
+
 class TeamMembersTable
 {
     public static function configure(Table $table): Table
@@ -20,26 +21,46 @@ class TeamMembersTable
 
         return $table
             ->columns([
-                ImageColumn::make('image')
+                // Photo
+                SpatieMediaLibraryImageColumn::make('image')
                     ->label(__('Photo'))
+                    ->collection('image')
+                    ->conversion('thumb')
                     ->circular()
                     ->size(44),
 
+                // Name (translatable)
                 TextColumn::make('name')
                     ->label(__('Name'))
                     ->getStateUsing(fn ($record) => $record->getTranslation('name', App::getLocale()) ?? '—')
-                    ->searchable()
+                    ->searchable(query: function ($query, string $value) {
+                        $query->whereRaw("JSON_SEARCH(LOWER(name), 'one', ?) IS NOT NULL", ['%' . strtolower($value) . '%']);
+                    })
+                    ->sortable(query: fn ($query, string $direction) =>
+                    $query->orderByRaw("JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"" . App::getLocale() . "\"')) {$direction}")
+                    )
                     ->limit(35),
 
+                // Position (translatable)
                 TextColumn::make('position')
                     ->label(__('Position'))
                     ->getStateUsing(fn ($record) => $record->getTranslation('position', App::getLocale()) ?? '—')
-                    ->limit(35),
+                    ->limit(35)
+                    ->toggleable(),
 
+                // Department
                 TextColumn::make('department.name')
                     ->label(__('Department'))
-                    ->limit(25),
+                    ->limit(25)
+                    ->toggleable(),
 
+                // Email
+                TextColumn::make('email')
+                    ->label(__('Email'))
+                    ->limit(30)
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                // Status badge
                 TextColumn::make('status')
                     ->label(__('Status'))
                     ->badge()
@@ -48,16 +69,28 @@ class TeamMembersTable
                         'published' => __('Published'),
                         default     => $state,
                     })
-                    ->colors([
-                        'draft'     => 'gray',
+                    ->color(fn (string $state): string => match ($state) {
                         'published' => 'success',
-                    ]),
+                        default     => 'gray',
+                    }),
 
+                // Display order
+                TextColumn::make('order')
+                    ->label(__('Order'))
+                    ->sortable()
+                    ->alignCenter()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                // Updated at
                 TextColumn::make('updated_at')
                     ->label(__('Updated At'))
                     ->dateTime($isFarsi ? 'j F Y H:i' : 'M j, Y H:i')
                     ->sortable()
-                    ->when($isFarsi, fn (TextColumn $column) => $column->jalaliDateTime('j F Y H:i')),
+                    ->when(
+                        $isFarsi,
+                        fn (TextColumn $column) => $column->jalaliDateTime('j F Y H:i')
+                    )
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('order', 'asc')
             ->filters([
@@ -72,9 +105,9 @@ class TeamMembersTable
                     ]),
             ])
             ->recordActions([
+                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
-                ViewAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

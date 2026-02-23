@@ -51,6 +51,19 @@ class MilestoneResource extends Resource
             'edit' => EditMilestone::route('/{record}/edit'),
         ];
     }
-    public static function getNavigationBadge(): ?string { return static::getModel()::where('status', 'published')->count() ?: null; }
-    public static function getNavigationBadgeColor(): ?string { return 'success'; }
+    public static function getNavigationBadge(): ?string
+    {
+        $drafts = static::getModel()::where('status', 'draft')->count();
+        if ($drafts) {
+            return $drafts;
+        }
+        return static::getModel()::where('status', 'published')->count() ?: null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return static::getModel()::where('status', 'draft')->exists()
+            ? 'warning'
+            : 'success';
+    }
 }

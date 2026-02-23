@@ -9,6 +9,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -18,50 +19,82 @@ class CustomersTable
 {
     public static function configure(Table $table): Table
     {
+        $isFarsi = App::isLocale('fa');
+
         return $table
             ->columns([
-            ImageColumn::make('logo')
-                ->label(__('Logo'))
-                ->circular()
-                ->size(40),
-            TextColumn::make('name')
-                ->label(__('Name'))
-                ->getStateUsing(fn ($r) => $r
-                    ->getTranslation('name', App::getLocale()) ?? '—')
-                ->searchable()
-                ->limit(35),
-            TextColumn::make('industry')
-                ->label(__('Industry'))
-                ->badge()
-                ->color('info')
-                ->limit(25),
-            TextColumn::make('country')
-                ->label(__('Country'))
-                ->limit(25),
-            IconColumn::make('featured')
-                ->label(__('Featured'))
-                ->boolean()
-                ->alignCenter(),
-            TextColumn::make('status')
-                ->label(__('Status'))
-                ->badge()
+                SpatieMediaLibraryImageColumn::make('logo')
+                    ->label(__('Logo'))
+                    ->collection('logo')
+                    ->circular()
+                    ->size(40)
+                    ->placeholder(__('No logo')),
 
-                ->formatStateUsing(fn (string $s): string => match ($s) { 'draft' => __('Draft'), 'published' => __('Published'), default => $s })
+                TextColumn::make('name')
+                    ->label(__('Name'))
+                    ->getStateUsing(fn ($record) => $record->getTranslation('name', App::getLocale()) ?? '—')
+                    ->searchable()
+                    ->limit(35)
+                    ->tooltip(fn ($state): ?string => $state),
 
-                ->colors(['draft' => 'gray', 'published' => 'success']),
-        ])
+                TextColumn::make('industry')
+                    ->label(__('Industry'))
+                    ->badge()
+                    ->color('info')
+                    ->limit(25),
 
+                TextColumn::make('country')
+                    ->label(__('Country'))
+                    ->limit(25),
+
+                IconColumn::make('featured')
+                    ->label(__('Featured'))
+                    ->boolean()
+                    ->trueColor('warning')
+                    ->alignCenter(),
+
+                TextColumn::make('status')
+                    ->label(__('Status'))
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'draft'     => __('Draft'),
+                        'published' => __('Published'),
+                        default     => $state,
+                    })
+                    ->colors([
+                        'draft'     => 'gray',
+                        'published' => 'success',
+                    ]),
+
+                TextColumn::make('order')
+                    ->label(__('Order'))
+                    ->sortable()
+                    ->alignCenter()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
             ->defaultSort('order', 'asc')
-
             ->filters([
                 SelectFilter::make('featured')
-                    ->options(['1' => __('Featured'), '0' => __('Not Featured')]),
+                    ->options([
+                        '1' => __('Featured'),
+                        '0' => __('Not Featured'),
+                    ]),
+
                 SelectFilter::make('status')
-                    ->options(['draft' => __('Draft'), 'published' => __('Published')]),
+                    ->options([
+                        'draft'     => __('Draft'),
+                        'published' => __('Published'),
+                    ]),
             ])
-
-            ->recordActions([EditAction::make(), DeleteAction::make(), ViewAction::make()])
-
-            ->toolbarActions([BulkActionGroup::make([DeleteBulkAction::make()])]);
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
     }
 }

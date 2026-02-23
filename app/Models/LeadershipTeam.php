@@ -20,12 +20,14 @@ class LeadershipTeam extends Model implements HasMedia
         'position',
         'short_bio',
         'long_bio',
+        'education',        // translatable JSON [{degree, institution, year}]
+        'experience',       // translatable JSON [{role, organization, duration}]
         'department_id',
         'email',
         'phone',
         'linkedin_url',
         'twitter_url',
-        'achievements',
+        'achievements',     // non-translatable JSON [{title, year, description}]
         'order',
         'featured',
         'status',
@@ -36,6 +38,8 @@ class LeadershipTeam extends Model implements HasMedia
         'position',
         'short_bio',
         'long_bio',
+        'education',
+        'experience',
     ];
 
     protected $casts = [

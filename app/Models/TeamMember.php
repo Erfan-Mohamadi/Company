@@ -17,13 +17,15 @@ class TeamMember extends Model implements HasMedia
         'name',
         'position',
         'bio',
+        'education',        // translatable JSON [{degree, institution, year}]
+        'experience',       // translatable JSON [{role, organization, duration}]
         'department_id',
         'email',
         'phone',
         'linkedin_url',
         'twitter_url',
         'facebook_url',
-        'skills',
+        'skills',           // non-translatable JSON [{name, level}]
         'order',
         'status',
     ];
@@ -32,6 +34,8 @@ class TeamMember extends Model implements HasMedia
         'name',
         'position',
         'bio',
+        'education',
+        'experience',
     ];
 
     protected $casts = [
