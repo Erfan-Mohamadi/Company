@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Clusters\AboutCompany;
 use Filament\Http\Middleware\Authenticate;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
@@ -45,8 +46,9 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
+            ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\Filament\Clusters')
             ->pages([
-                Dashboard::class,
+//                Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
@@ -75,6 +77,12 @@ class AdminPanelProvider extends PanelProvider
                     ),
             ])
             ->navigationGroups([
+                NavigationGroup::make()
+                    ->label(__('Permissions'))
+                    ->collapsible(),
+                NavigationGroup::make()
+                    ->label(__('Settings'))
+                    ->collapsible(),
             ])
             ->renderHook(
                 'panels::body.end',

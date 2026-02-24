@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Suppliers;
 
+use App\Filament\Clusters\AboutCompany;
 use App\Filament\Resources\Suppliers\Pages\CreateSupplier;
 use App\Filament\Resources\Suppliers\Pages\EditSupplier;
 use App\Filament\Resources\Suppliers\Pages\ListSuppliers;
@@ -17,6 +18,7 @@ use Filament\Tables\Table;
 class SupplierResource extends Resource
 {
     protected static ?string $model = Supplier::class;
+    protected static ?string $cluster = AboutCompany::class;
     protected static ?string $recordTitleAttribute = 'Supplier';
     protected static string|null|\BackedEnum $navigationIcon = Heroicon::Truck;
     protected static string|null|\UnitEnum $navigationGroup = 'Business Network';

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Milestones;
 
+use App\Filament\Clusters\AboutCompany;
 use App\Filament\Resources\Milestones\Pages\CreateMilestone;
 use App\Filament\Resources\Milestones\Pages\EditMilestone;
 use App\Filament\Resources\Milestones\Pages\ListMilestones;
@@ -16,6 +17,8 @@ use Filament\Tables\Table;
 
 class MilestoneResource extends Resource
 {
+    protected static ?string $cluster = AboutCompany::class;
+
     protected static ?string $model = Milestone::class;
     protected static ?string $recordTitleAttribute = 'Milestone';
     protected static string|null|\BackedEnum $navigationIcon = Heroicon::Flag;

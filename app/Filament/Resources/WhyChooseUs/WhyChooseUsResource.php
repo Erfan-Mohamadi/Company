@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\WhyChooseUs;
 
+use App\Filament\Clusters\AboutCompany;
 use App\Filament\Resources\WhyChooseUs\Pages\CreateWhyChooseUs;
 use App\Filament\Resources\WhyChooseUs\Pages\EditWhyChooseUs;
 use App\Filament\Resources\WhyChooseUs\Pages\ListWhyChooseUs;
@@ -17,6 +18,7 @@ class WhyChooseUsResource extends Resource
     protected static ?string $model = WhyChooseUs::class;
 
     protected static ?string $recordTitleAttribute = 'WhyChooseUs';
+    protected static ?string $cluster = AboutCompany::class;
 
     protected static string|null|\BackedEnum $navigationIcon = Heroicon::Star;
 

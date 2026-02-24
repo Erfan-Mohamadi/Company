@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\LeadershipTeams;
 
+use App\Filament\Clusters\AboutCompany;
 use App\Filament\Resources\LeadershipTeams\Pages\CreateLeadershipTeam;
 use App\Filament\Resources\LeadershipTeams\Pages\EditLeadershipTeam;
 use App\Filament\Resources\LeadershipTeams\Pages\ListLeadershipTeams;
@@ -18,6 +19,7 @@ class LeadershipTeamResource extends Resource
 {
     protected static ?string $model = LeadershipTeam::class;
     protected static ?string $recordTitleAttribute = 'LeadershipTeam';
+    protected static ?string $cluster = AboutCompany::class;
 
     protected static string|null|\BackedEnum $navigationIcon = Heroicon::UserGroup;
 

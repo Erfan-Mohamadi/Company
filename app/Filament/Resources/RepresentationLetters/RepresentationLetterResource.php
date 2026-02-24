@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\RepresentationLetters;
 
+use App\Filament\Clusters\AboutCompany;
 use App\Filament\Resources\RepresentationLetters\Pages\CreateRepresentationLetter;
 use App\Filament\Resources\RepresentationLetters\Pages\EditRepresentationLetter;
 use App\Filament\Resources\RepresentationLetters\Pages\ListRepresentationLetters;
@@ -18,6 +19,7 @@ class RepresentationLetterResource extends Resource
 {
     protected static ?string $model = RepresentationLetter::class;
     protected static ?string $recordTitleAttribute = 'RepresentationLetter';
+    protected static ?string $cluster = AboutCompany::class;
     protected static string|null|\BackedEnum $navigationIcon = Heroicon::DocumentDuplicate;
     protected static string|null|\UnitEnum $navigationGroup = 'Achievements';
     protected static ?int $navigationSort = 5;

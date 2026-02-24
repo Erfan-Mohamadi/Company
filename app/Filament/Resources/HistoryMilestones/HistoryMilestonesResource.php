@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\HistoryMilestones;
 
+use App\Filament\Clusters\AboutCompany;
 use App\Filament\Resources\HistoryMilestones\Pages\CreateHistoryMilestones;
 use App\Filament\Resources\HistoryMilestones\Pages\EditHistoryMilestones;
 use App\Filament\Resources\HistoryMilestones\Pages\ListHistoryMilestones;
@@ -18,6 +19,7 @@ class HistoryMilestonesResource extends Resource
     protected static ?string $model = HistoryMilestone::class;
 
     protected static string|null|\BackedEnum $navigationIcon = Heroicon::Clock;
+    protected static ?string $cluster = AboutCompany::class;
 
     protected static string|null|\UnitEnum $navigationGroup = 'Company Profile';
     protected static ?string $recordTitleAttribute = 'HistoryMilestones';

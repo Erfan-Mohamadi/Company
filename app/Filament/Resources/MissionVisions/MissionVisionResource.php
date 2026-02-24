@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\MissionVisions;
 
+use App\Filament\Clusters\AboutCompany;
 use App\Filament\Resources\MissionVisions\Pages\CreateMissionVision;
 use App\Filament\Resources\MissionVisions\Pages\EditMissionVision;
 use App\Filament\Resources\MissionVisions\Pages\ListMissionVisions;
@@ -17,6 +18,7 @@ use Filament\Tables\Table;
 class MissionVisionResource extends Resource
 {
     protected static ?string $model = MissionVision::class;
+    protected static ?string $cluster = AboutCompany::class;
 
     protected static string|null|BackedEnum $navigationIcon = 'heroicon-o-eye';
 

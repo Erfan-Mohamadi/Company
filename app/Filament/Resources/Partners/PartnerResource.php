@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Partners;
 
+use App\Filament\Clusters\AboutCompany;
 use App\Filament\Resources\Partners\Pages\CreatePartner;
 use App\Filament\Resources\Partners\Pages\EditPartner;
 use App\Filament\Resources\Partners\Pages\ListPartners;
@@ -17,6 +18,7 @@ use Filament\Tables\Table;
 class PartnerResource extends Resource
 {
     protected static ?string $model = Partner::class;
+    protected static ?string $cluster = AboutCompany::class;
     protected static ?string $recordTitleAttribute = 'Partner';
     protected static string|null|\BackedEnum $navigationIcon = Heroicon::HandRaised;
     protected static string|null|\UnitEnum $navigationGroup = 'Business Network';

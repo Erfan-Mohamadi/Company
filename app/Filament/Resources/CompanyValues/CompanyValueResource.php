@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\CompanyValues;
 
+use App\Filament\Clusters\AboutCompany;
 use App\Filament\Resources\CompanyValues\Pages\CreateCompanyValue;
 use App\Filament\Resources\CompanyValues\Pages\EditCompanyValue;
 use App\Filament\Resources\CompanyValues\Pages\ListCompanyValues;
@@ -17,48 +18,19 @@ class CompanyValueResource extends Resource
 {
     protected static ?string $model = CompanyValue::class;
     protected static ?string $recordTitleAttribute = 'CompanyValue';
-
+    protected static ?string $cluster = AboutCompany::class;
     protected static string|null|\BackedEnum $navigationIcon = Heroicon::Star;
-
     protected static string|null|\UnitEnum $navigationGroup = 'Company Profile';
-
     protected static ?int $navigationSort = 7;
 
-    public static function getNavigationGroup(): ?string
-    {
-        return __('Company Profile');
-    }
+    public static function getNavigationGroup(): ?string { return __('Company Profile'); }
+    public static function getNavigationLabel(): string  { return __('Company Values'); }
+    public static function getModelLabel(): string       { return __('Company Value'); }
+    public static function getPluralModelLabel(): string { return __('Company Values'); }
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Company Values');
-    }
-
-    public static function getModelLabel(): string
-    {
-        return __('Company Value');
-    }
-
-    public static function getPluralModelLabel(): string
-    {
-        return __('Company Values');
-    }
-
-    public static function form(Schema $schema): Schema
-    {
-        return CompanyValueForm::configure($schema);
-    }
-
-    public static function table(Table $table): Table
-    {
-        return CompanyValuesTable::configure($table);
-    }
-
-
-    public static function getRelations(): array
-    {
-        return [];
-    }
+    public static function form(Schema $schema): Schema  { return CompanyValueForm::configure($schema); }
+    public static function table(Table $table): Table    { return CompanyValuesTable::configure($table); }
+    public static function getRelations(): array         { return []; }
 
     public static function getPages(): array
     {
@@ -72,16 +44,11 @@ class CompanyValueResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         $drafts = static::getModel()::where('status', 'draft')->count();
-        if ($drafts) {
-            return $drafts;
-        }
-        return static::getModel()::where('status', 'published')->count() ?: null;
+        return $drafts ?: (static::getModel()::where('status', 'published')->count() ?: null);
     }
 
     public static function getNavigationBadgeColor(): ?string
     {
-        return static::getModel()::where('status', 'draft')->exists()
-            ? 'warning'
-            : 'success';
+        return static::getModel()::where('status', 'draft')->exists() ? 'warning' : 'success';
     }
 }

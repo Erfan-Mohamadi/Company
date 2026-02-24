@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ExportMarkets;
 
+use App\Filament\Clusters\AboutCompany;
 use App\Filament\Resources\ExportMarkets\Pages\CreateExportMarket;
 use App\Filament\Resources\ExportMarkets\Pages\EditExportMarket;
 use App\Filament\Resources\ExportMarkets\Pages\ListExportMarkets;
@@ -17,6 +18,7 @@ use Filament\Tables\Table;
 class ExportMarketResource extends Resource
 {
     protected static ?string $model = ExportMarket::class;
+    protected static ?string $cluster = AboutCompany::class;
     protected static ?string $recordTitleAttribute = 'ExportMarket';
     protected static string|null|\BackedEnum $navigationIcon = Heroicon::GlobeAlt;
     protected static string|null|\UnitEnum $navigationGroup = 'Business Network';

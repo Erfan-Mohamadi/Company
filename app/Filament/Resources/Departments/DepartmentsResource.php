@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Departments;
 
+use App\Filament\Clusters\AboutCompany;
 use App\Filament\Resources\Departments\Pages\CreateDepartments;
 use App\Filament\Resources\Departments\Pages\EditDepartments;
 use App\Filament\Resources\Departments\Pages\ListDepartments;
@@ -18,6 +19,7 @@ class DepartmentsResource extends Resource
 {
     protected static ?string $model = Department::class;
     protected static ?string $recordTitleAttribute = 'Department';
+    protected static ?string $cluster = AboutCompany::class;
 
     protected static string|null|\BackedEnum $navigationIcon = Heroicon::BuildingOffice;
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\OrganizationalCharts;
 
+use App\Filament\Clusters\AboutCompany;
 use App\Filament\Resources\OrganizationalCharts\Pages\CreateOrganizationalCharts;
 use App\Filament\Resources\OrganizationalCharts\Pages\EditOrganizationalCharts;
 use App\Filament\Resources\OrganizationalCharts\Pages\ListOrganizationalCharts;
@@ -18,6 +19,7 @@ class OrganizationalChartsResource extends Resource
 {
     protected static ?string $model = OrganizationalChart::class;
     protected static ?string $recordTitleAttribute = 'OrganizationalChart';
+    protected static ?string $cluster = AboutCompany::class;
 
     protected static string|null|\BackedEnum $navigationIcon = Heroicon::ChartBarSquare;
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\GoalStrategies;
 
+use App\Filament\Clusters\AboutCompany;
 use App\Filament\Resources\GoalStrategies\Pages\CreateGoalStrategy;
 use App\Filament\Resources\GoalStrategies\Pages\EditGoalStrategy;
 use App\Filament\Resources\GoalStrategies\Pages\ListGoalStrategies;
@@ -17,6 +18,7 @@ class GoalStrategyResource extends Resource
     protected static ?string $model = GoalStrategy::class;
     protected static ?string $recordTitleAttribute = 'GoalStrategy';
 
+    protected static ?string $cluster = AboutCompany::class;
 
     protected static string|null|\BackedEnum $navigationIcon = Heroicon::RocketLaunch;
 

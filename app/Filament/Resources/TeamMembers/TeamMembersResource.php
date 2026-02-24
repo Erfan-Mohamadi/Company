@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\TeamMembers;
 
+use App\Filament\Clusters\AboutCompany;
 use App\Filament\Resources\TeamMembers\Pages\CreateTeamMembers;
 use App\Filament\Resources\TeamMembers\Pages\EditTeamMembers;
 use App\Filament\Resources\TeamMembers\Pages\ListTeamMembers;
@@ -18,7 +19,7 @@ class TeamMembersResource extends Resource
 {
     protected static ?string $model = TeamMember::class;
     protected static ?string $recordTitleAttribute = 'TeamMember';
-
+    protected static ?string $cluster = AboutCompany::class;
     protected static string|null|\BackedEnum $navigationIcon = Heroicon::Users;
 
     protected static string|null|\UnitEnum $navigationGroup = 'Our Team';

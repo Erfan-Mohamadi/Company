@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Licenses;
 
+use App\Filament\Clusters\AboutCompany;
 use App\Filament\Resources\Licenses\Pages\CreateLicense;
 use App\Filament\Resources\Licenses\Pages\EditLicense;
 use App\Filament\Resources\Licenses\Pages\ListLicenses;
@@ -18,6 +19,7 @@ class LicenseResource extends Resource
 {
     protected static ?string $model = License::class;
     protected static ?string $recordTitleAttribute = 'License';
+    protected static ?string $cluster = AboutCompany::class;
 
     protected static string|null|\BackedEnum $navigationIcon = Heroicon::DocumentText;
     protected static string|null|\UnitEnum $navigationGroup = 'Achievements';
