@@ -8,6 +8,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -21,20 +22,20 @@ class CompanyValuesTable
 
         return $table
             ->columns([
-                ImageColumn::make('image')
+                SpatieMediaLibraryImageColumn::make('image')
                     ->label(__('Image'))
-                    ->circular()
-                    ->size(40),
+                    ->alignCenter(),
 
                 TextColumn::make('title')
                     ->label(__('Title'))
                     ->getStateUsing(fn ($record) => $record->getTranslation('title', App::getLocale()) ?? '—')
                     ->searchable()
-                    ->limit(50)
-                    ->tooltip(fn ($state): ?string => $state),
+                    ->alignCenter()
+                    ->limit(50),
 
                 TextColumn::make('icon')
                     ->label(__('Icon'))
+                    ->alignCenter()
                     ->limit(30)
                     ->color('gray'),
 

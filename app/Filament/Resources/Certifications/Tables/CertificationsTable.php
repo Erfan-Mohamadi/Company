@@ -26,22 +26,26 @@ class CertificationsTable
                     ->label(__('Certificate Image'))
                     ->collection('certificate_image')
                     ->circular()
+                    ->alignCenter()
                     ->size(40),
 
                 TextColumn::make('title')
                     ->label(__('Title'))
                     ->getStateUsing(fn ($record) => $record->getTranslation('title', App::getLocale()) ?? '—')
                     ->searchable()
+                    ->alignCenter()
                     ->limit(40),
 
                 TextColumn::make('certification_body')
                     ->label(__('Certification Body'))
+                    ->alignCenter()
                     ->limit(30),
 
                 TextColumn::make('issue_date')
                     ->label(__('Issue Date'))
                     ->date($isFarsi ? 'j F Y' : 'M j, Y')
                     ->sortable()
+                    ->alignCenter()
                     ->when(
                         $isFarsi,
                         fn (TextColumn $column) => $column->jalaliDate('j F Y')
@@ -51,6 +55,7 @@ class CertificationsTable
                     ->label(__('Expiry Date'))
                     ->date($isFarsi ? 'j F Y' : 'M j, Y')
                     ->sortable()
+                    ->alignCenter()
                     ->color(fn ($record) => $record->expiry_date?->isPast() ? 'danger' : 'success')
                     ->when(
                         $isFarsi,
@@ -77,10 +82,10 @@ class CertificationsTable
             ])
             ->defaultSort('order', 'asc')
             ->filters([
-                SelectFilter::make('featured')
+                SelectFilter::make(__('featured'))
                     ->options(['1' => __('Featured'), '0' => __('Not Featured')]),
 
-                SelectFilter::make('status')
+                SelectFilter::make(__('status'))
                     ->options([
                         'draft'     => __('Draft'),
                         'published' => __('Published'),

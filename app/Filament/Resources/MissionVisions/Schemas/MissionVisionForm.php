@@ -68,7 +68,7 @@ class MissionVisionForm
 
                                                     // ── Page Header ──────────────────────────────────────
                                                     TextInput::make("header.{$code}")
-                                                        ->label(__('Page Header'))
+                                                        ->label(__('Header'))
                                                         ->required($isMain)
                                                         ->maxLength(255)
                                                         ->columnSpanFull(),

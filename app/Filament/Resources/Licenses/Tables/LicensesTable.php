@@ -24,14 +24,17 @@ class LicensesTable
                     ->label(__('License Name'))
                     ->getStateUsing(fn ($record) => $record->getTranslation('license_name', App::getLocale()) ?? '—')
                     ->searchable()
+                    ->alignCenter()
                     ->limit(40),
 
                 TextColumn::make('license_number')
                     ->label(__('Number'))
+                    ->alignCenter()
                     ->copyable()
                     ->limit(20),
 
                 TextColumn::make('issuing_authority')
+                    ->alignCenter()
                     ->label(__('Issuing Authority'))
                     ->getStateUsing(fn ($record) => $record->getTranslation('issuing_authority', App::getLocale()) ?? '—')
                     ->limit(30),
@@ -39,6 +42,7 @@ class LicensesTable
                 TextColumn::make('expiry_date')
                     ->label(__('Expiry Date'))
                     ->date($isFarsi ? 'j F Y' : 'M j, Y')
+                    ->alignCenter()
                     ->sortable()
                     ->color(fn ($record) => match (true) {
                         !$record->expiry_date => 'gray',
@@ -53,6 +57,7 @@ class LicensesTable
 
                 TextColumn::make('status')
                     ->label(__('Status'))
+                    ->alignCenter()
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'draft'     => __('Draft'),
@@ -66,13 +71,14 @@ class LicensesTable
 
                 TextColumn::make('order')
                     ->label(__('Order'))
+                    ->alignCenter()
                     ->sortable()
                     ->alignCenter()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('order', 'asc')
             ->filters([
-                SelectFilter::make('license_type')
+                SelectFilter::make(__('license_type'))
                     ->options([
                         'trade'        => __('Trade'),
                         'professional' => __('Professional'),
@@ -81,7 +87,7 @@ class LicensesTable
                         'other'        => __('Other'),
                     ]),
 
-                SelectFilter::make('status')
+                SelectFilter::make(__('status'))
                     ->options([
                         'draft'     => __('Draft'),
                         'published' => __('Published'),

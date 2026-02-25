@@ -25,27 +25,27 @@ class AwardsTable
             ->columns([
                 SpatieMediaLibraryImageColumn::make('image')
                     ->label(__('Image'))
+                    ->alignCenter()
                     ->collection('image')
-                    ->circular()
-                    ->size(40)
                     ->placeholder(__('No image')),
 
                 TextColumn::make('title')
                     ->label(__('Title'))
                     ->getStateUsing(fn ($record) => $record->getTranslation('title', App::getLocale()) ?? '—')
+                    ->alignCenter()
                     ->searchable()
-                    ->sortable()
-                    ->limit(40)
-                    ->tooltip(fn ($state): ?string => $state),
+                    ->limit(40),
 
                 TextColumn::make('awarding_body')
                     ->label(__('Awarding Body'))
+                    ->alignCenter()
                     ->getStateUsing(fn ($record) => $record->getTranslation('awarding_body', App::getLocale()) ?? '—')
                     ->limit(30),
 
                 TextColumn::make('award_date')
                     ->label(__('Date'))
                     ->date($isFarsi ? 'j F Y' : 'M j, Y')
+                    ->alignCenter()
                     ->sortable()
                     ->when(
                         $isFarsi,
@@ -55,18 +55,21 @@ class AwardsTable
                 TextColumn::make('category')
                     ->label(__('Category'))
                     ->getStateUsing(fn ($record) => $record->getTranslation('category', App::getLocale()) ?? '—')
+                    ->alignCenter()
                     ->badge()
                     ->color('warning')
                     ->limit(20),
 
                 IconColumn::make('featured')
                     ->label(__('Featured'))
+                    ->alignCenter()
                     ->boolean()
                     ->alignCenter(),
 
                 TextColumn::make('status')
                     ->label(__('Status'))
                     ->badge()
+                    ->alignCenter()
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'draft'     => __('Draft'),
                         'published' => __('Published'),
@@ -85,10 +88,10 @@ class AwardsTable
             ])
             ->defaultSort('award_date', 'desc')
             ->filters([
-                SelectFilter::make('featured')
+                SelectFilter::make(__('featured'))
                     ->options(['1' => __('Featured'), '0' => __('Not Featured')]),
 
-                SelectFilter::make('status')
+                SelectFilter::make(__('status'))
                     ->options([
                         'draft'     => __('Draft'),
                         'published' => __('Published'),

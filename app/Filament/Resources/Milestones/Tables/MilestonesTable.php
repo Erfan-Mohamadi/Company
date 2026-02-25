@@ -38,37 +38,20 @@ class MilestonesTable
             ->columns([
                 SpatieMediaLibraryImageColumn::make('image')
                     ->label(__('Image'))
+                    ->alignCenter()
                     ->collection('image')
-                    ->circular()
-                    ->size(40)
                     ->placeholder(__('No image')),
 
                 TextColumn::make('date')
                     ->label(__('Date'))
-                    ->sortable()
                     ->alignCenter()
-                    ->formatStateUsing(function ($state) use ($isFarsi, $jalaliMonths) {
-                        if (!$state) return '—';
-
-                        $date = $state instanceof \Carbon\Carbon ? $state : \Carbon\Carbon::parse($state);
-
-                        if ($isFarsi && class_exists(\Morilog\Jalali\Jalalian::class)) {
-                            $jalali = \Morilog\Jalali\Jalalian::fromCarbon($date);
-                            return sprintf(
-                                '%s %d %d',
-                                $jalaliMonths[$jalali->getMonth()] ?? '—',
-                                $jalali->getDay(),
-                                $jalali->getYear()
-                            );
-                        }
-
-                        return $date->format('d M Y');
-                    })
-                    ->badge()
-                    ->color('primary'),
+                    ->dateTime($isFarsi ? 'j F Y' : 'M j, Y')
+                    ->sortable()
+                    ->when($isFarsi, fn (TextColumn $column) => $column->jalaliDateTime('j F Y')),
 
                 TextColumn::make('title')
                     ->label(__('Title'))
+                    ->alignCenter()
                     ->getStateUsing(fn ($record) => $record->getTranslation('title', App::getLocale()) ?? '—')
                     ->searchable()
                     ->limit(50)
@@ -76,6 +59,7 @@ class MilestonesTable
 
                 TextColumn::make('achievement_type')
                     ->label(__('Type'))
+                    ->alignCenter()
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'product_launch' => __('Product Launch'),
@@ -89,6 +73,7 @@ class MilestonesTable
                 TextColumn::make('status')
                     ->label(__('Status'))
                     ->badge()
+                    ->alignCenter()
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'draft'     => __('Draft'),
                         'published' => __('Published'),
@@ -107,7 +92,7 @@ class MilestonesTable
             ])
             ->defaultSort('date', 'desc')
             ->filters([
-                SelectFilter::make('achievement_type')
+                SelectFilter::make(__('achievement_type'))
                     ->options([
                         'product_launch' => __('Product Launch'),
                         'expansion'      => __('Expansion'),
@@ -116,7 +101,7 @@ class MilestonesTable
                         'other'          => __('Other'),
                     ]),
 
-                SelectFilter::make('status')
+                SelectFilter::make(__('status'))
                     ->options([
                         'draft'     => __('Draft'),
                         'published' => __('Published'),

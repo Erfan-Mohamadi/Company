@@ -42,15 +42,15 @@ class HistoryMilestonesTable
                 TextColumn::make('status')
                     ->label(__('Status'))
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'draft'     => __('Draft'),
+                        'published' => __('Published'),
+                        default     => $state,
+                    })
                     ->colors([
                         'draft'     => 'gray',
                         'published' => 'success',
                     ]),
-
-                TextColumn::make('order')
-                    ->label(__('Order'))
-                    ->sortable()
-                    ->alignCenter(),
 
                 TextColumn::make('updated_at')
                     ->label(__('Updated At'))

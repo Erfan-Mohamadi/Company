@@ -20,21 +20,6 @@ class CompanyHistoriesTable
     {
         $isFarsi = App::isLocale('fa');
 
-        $jalaliMonths = [
-            1  => 'فروردین',
-            2  => 'اردیبهشت',
-            3  => 'خرداد',
-            4  => 'تیر',
-            5  => 'مرداد',
-            6  => 'شهریور',
-            7  => 'مهر',
-            8  => 'آبان',
-            9  => 'آذر',
-            10 => 'دی',
-            11 => 'بهمن',
-            12 => 'اسفند',
-        ];
-
         return $table
             ->columns([
                 SpatieMediaLibraryImageColumn::make('image')
@@ -53,25 +38,9 @@ class CompanyHistoriesTable
 
                 TextColumn::make('date')
                     ->label(__('Date'))
+                    ->dateTime($isFarsi ? 'j F Y H:i' : 'M j, Y H:i')
                     ->sortable()
-                    ->alignCenter()
-                    ->formatStateUsing(function ($state) use ($isFarsi, $jalaliMonths) {
-                        if (!$state) return '—';
-
-                        $date = $state instanceof \Carbon\Carbon ? $state : \Carbon\Carbon::parse($state);
-
-                        if ($isFarsi && class_exists(\Morilog\Jalali\Jalalian::class)) {
-                            $jalali = \Morilog\Jalali\Jalalian::fromCarbon($date);
-                            return sprintf(
-                                '%s %d %d',
-                                $jalaliMonths[$jalali->getMonth()] ?? '—',
-                                $jalali->getDay(),
-                                $jalali->getYear()
-                            );
-                        }
-
-                        return $date->format('M j, Y');
-                    }),
+                    ->when($isFarsi, fn (TextColumn $column) => $column->jalaliDateTime('j F Y H:i')),
 
                 TextColumn::make('achievement_type')
                     ->label(__('Type'))
@@ -107,7 +76,7 @@ class CompanyHistoriesTable
             ])
             ->defaultSort('date', 'desc')
             ->filters([
-                SelectFilter::make('achievement_type')
+                SelectFilter::make(__('achievement_type'))
                     ->options([
                         'founding'       => __('Founding'),
                         'product_launch' => __('Product Launch'),
@@ -117,7 +86,7 @@ class CompanyHistoriesTable
                         'other'          => __('Other'),
                     ]),
 
-                SelectFilter::make('status')
+                SelectFilter::make(__('status'))
                     ->options([
                         'draft'     => __('Draft'),
                         'published' => __('Published'),

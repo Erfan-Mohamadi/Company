@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Clusters\AboutCompany;
+use Biostate\FilamentMenuBuilder\FilamentMenuBuilderPlugin;
 use Filament\Http\Middleware\Authenticate;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
@@ -75,6 +76,7 @@ class AdminPanelProvider extends PanelProvider
                         hasAvatars: true,
                         slug: 'my-profile'
                     ),
+                FilamentMenuBuilderPlugin::make(),
             ])
             ->navigationGroups([
                 NavigationGroup::make()

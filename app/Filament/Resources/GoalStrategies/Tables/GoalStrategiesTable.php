@@ -11,6 +11,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\App;
+use phpDocumentor\Reflection\PseudoTypes\HtmlEscapedString;
 
 class GoalStrategiesTable
 {
@@ -24,17 +25,19 @@ class GoalStrategiesTable
                     ->label(__('Title'))
                     ->getStateUsing(fn ($record) => $record->getTranslation('title', App::getLocale()) ?? '—')
                     ->searchable()
+                    ->alignCenter()
                     ->limit(60)
                     ->tooltip(fn ($state): ?string => $state),
 
                 TextColumn::make('short_summary')
                     ->label(__('Short Summary'))
-                    ->limit(30)
-                    ->tooltip(fn ($state): ?string => $state),
+                    ->alignCenter()
+                    ->limit(30),
 
                 TextColumn::make('type')
                     ->label(__('Type'))
                     ->badge()
+                    ->alignCenter()
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'goal'     => __('goal'),
                         'strategy' => __('strategy'),
@@ -58,6 +61,7 @@ class GoalStrategiesTable
                 TextColumn::make('status')
                     ->label(__('Status'))
                     ->badge()
+                    ->alignCenter()
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'draft'     => __('Draft'),
                         'published' => __('Published'),
@@ -78,11 +82,12 @@ class GoalStrategiesTable
                     ->label(__('Updated At'))
                     ->dateTime($isFarsi ? 'j F Y H:i' : 'M j, Y H:i')
                     ->sortable()
+                    ->alignCenter()
                     ->when($isFarsi, fn (TextColumn $column) => $column->jalaliDateTime('j F Y H:i')),
             ])
             ->defaultSort('order', 'asc')
             ->filters([
-                SelectFilter::make('type')
+                SelectFilter::make(__('type'))
                     ->options([
                         'goal'      => __('Goal'),
                         'strategy'  => __('Strategy'),
@@ -90,7 +95,7 @@ class GoalStrategiesTable
                         'milestone' => __('Milestone'),
                     ]),
 
-                SelectFilter::make('status')
+                SelectFilter::make(__('status'))
                     ->options([
                         'draft'     => __('Draft'),
                         'published' => __('Published'),

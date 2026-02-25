@@ -8,6 +8,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\App;
 
@@ -22,25 +23,23 @@ class WhyChooseUsTable
                 TextColumn::make('title')
                     ->label(__('Title'))
                     ->getStateUsing(fn ($record) => $record->getTranslation('title', App::getLocale()) ?? '—')
+                    ->alignCenter()
                     ->searchable(),
 
                 TextColumn::make('short_description')
                     ->label(__('Short Description'))
-                    ->limit(100)
-                    ->tooltip(fn ($state): ?string => $state),
+                    ->alignCenter()
+                    ->limit(100),
 
                 TextColumn::make('items_count')
                     ->label(__('Advantages Count'))
+                    ->alignCenter()
                     ->state(fn ($record) => count($record->items[App::getLocale()] ?? [])),
-
-                TextColumn::make('order')
-                    ->label(__('Order'))
-                    ->sortable()
-                    ->alignCenter(),
 
                 TextColumn::make('status')
                     ->label(__('Status'))
                     ->badge()
+                    ->alignCenter()
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'draft'     => __('Draft'),
                         'published' => __('Published'),
@@ -55,9 +54,17 @@ class WhyChooseUsTable
                     ->label(__('Updated At'))
                     ->dateTime($isFarsi ? 'j F Y H:i' : 'M j, Y H:i')
                     ->sortable()
+                    ->alignCenter()
                     ->when($isFarsi, fn (TextColumn $c) => $c->jalaliDateTime('j F Y H:i')),
             ])
             ->defaultSort('order', 'asc')
+            ->filters([
+                SelectFilter::make('status')
+                    ->options([
+                        'draft'     => __('Draft'),
+                        'published' => __('Published'),
+                    ]),
+            ])
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),

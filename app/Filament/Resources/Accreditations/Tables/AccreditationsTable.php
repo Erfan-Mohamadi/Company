@@ -25,6 +25,7 @@ class AccreditationsTable
                 SpatieMediaLibraryImageColumn::make('logo')
                     ->label(__('Logo'))
                     ->collection('logo')
+                    ->alignCenter()
                     ->circular()
                     ->size(40)
                     ->placeholder(__('No logo')),
@@ -33,11 +34,13 @@ class AccreditationsTable
                     ->label(__('Organization'))
                     ->getStateUsing(fn ($record) => $record->getTranslation('organization_name', App::getLocale()) ?? '—')
                     ->searchable()
+                    ->alignCenter()
                     ->limit(40)
                     ->tooltip(fn ($state): ?string => $state),
 
                 TextColumn::make('accreditation_type')
                     ->label(__('Type'))
+                    ->alignCenter()
                     ->getStateUsing(fn ($record) => $record->getTranslation('accreditation_type', App::getLocale()) ?? '—')
                     ->badge()
                     ->color('info')
@@ -47,6 +50,7 @@ class AccreditationsTable
                     ->label(__('Since'))
                     ->date($isFarsi ? 'j F Y' : 'M j, Y')
                     ->sortable()
+                    ->alignCenter()
                     ->when(
                         $isFarsi,
                         fn (TextColumn $column) => $column->jalaliDate('j F Y')
@@ -56,6 +60,7 @@ class AccreditationsTable
                     ->label(__('Ends'))
                     ->date($isFarsi ? 'j F Y' : 'M j, Y')
                     ->sortable()
+                    ->alignCenter()
                     ->color(fn ($record) => match (true) {
                         !$record->end_date => 'gray',
                         $record->end_date->isPast() => 'danger',
@@ -70,6 +75,7 @@ class AccreditationsTable
                 TextColumn::make('status')
                     ->label(__('Status'))
                     ->badge()
+                    ->alignCenter()
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'draft'     => __('Draft'),
                         'published' => __('Published'),
@@ -88,7 +94,7 @@ class AccreditationsTable
             ])
             ->defaultSort('order', 'asc')
             ->filters([
-                SelectFilter::make('status')
+                SelectFilter::make(__('status'))
                     ->options([
                         'draft'     => __('Draft'),
                         'published' => __('Published'),

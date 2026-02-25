@@ -81,7 +81,7 @@ class MissionVisionsTable
             ])
             ->defaultSort('id', 'desc')
             ->filters([
-                SelectFilter::make('status')
+                SelectFilter::make(__('status'))
                     ->options([
                         'draft'     => __('Draft'),
                         'published' => __('Published'),
